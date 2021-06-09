@@ -4,6 +4,7 @@ import by.zhigarev.dao.GiftDAO;
 import by.zhigarev.dao.util.GiftMapper;
 import by.zhigarev.model.Gift;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -46,6 +47,7 @@ public class GiftDAOImpl implements GiftDAO {
         final int DURATION_INDEX = 4;
         final int CREATE_DATE_INDEX = 5;
         final int LAST_UPDATE_DATE_INDEX = 6;
+        final String ID_KEY = "id";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -61,7 +63,7 @@ public class GiftDAOImpl implements GiftDAO {
             return ps;
         }, keyHolder);
 
-        int id = keyHolder.getKey().intValue();
+        int id = (int) keyHolder.getKeys().get(ID_KEY);
         return getGiftById(id).get();
     }
 
@@ -79,7 +81,11 @@ public class GiftDAOImpl implements GiftDAO {
 
     @Override
     public Optional<Gift> getGiftById(int id) {
+        try{
         return Optional.ofNullable(template.queryForObject(SQL_GET_GIFT_BY_ID, mapper, id));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

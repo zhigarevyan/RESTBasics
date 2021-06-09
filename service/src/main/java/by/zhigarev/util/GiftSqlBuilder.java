@@ -19,7 +19,7 @@ public class GiftSqlBuilder {
         final String SQL_SET_DURATION = "duration = %d ";
         final String SQL_SET_LAST_UPDATE_DATE = "last_update_date = '%s' ";
         final String SQL_SET_COMMA = " , ";
-        final String SQL_SET_WHERE_ID = "where id = %d ";
+        final String SQL_SET_WHERE_ID = "where id = ? ";
 
         StringBuilder updateSQl = new StringBuilder(SQL_UPDATE);
 
@@ -40,24 +40,25 @@ public class GiftSqlBuilder {
             updateSQl.append(SQL_SET_COMMA);
             updateSQl.append(format(SQL_SET_DURATION, giftDTO.getDuration()));
         }
-        updateSQl.append(format(SQL_SET_WHERE_ID, giftDTO.getId()));
+        updateSQl.append(SQL_SET_WHERE_ID);
         return updateSQl.toString();
     }
 
     public String getGetWithParamsSQL(GiftSQLQueryParameters params) {
         final String SQL_GET_WITH_PARAMS = "select g.id, g.name, g.description, g.price," +
                 "g.duration, g.create_date, g.last_update_date from gift g ";
-        final String SQL_TAG_NAME = "where t.name = REGEXP '%S' ";
-        final String SQL_NAME = "g.name = REGEXP '%S' ";
-        final String SQL_DESCRIPTION = "g.description = REGEXP '%S' ";
+        final String SQL_TAG_NAME = "where t.name = '%s' ";
+        final String SQL_NAME = "g.name like '%s' ";
+        final String SQL_DESCRIPTION = "g.description like '%s' ";
         final String SQL_AND = "AND ";
         final String SQL_ASC = "ASC ";
         final String SQL_DESC = "DESC ";
-        final String SQL_SORT_BY_DATE = "SORT BY g.create_date ";
-        final String SQL_SORT_BY_NAME = "SORT BY g.name ";
+        final String SQL_PERCENT = "%";
+        final String SQL_SORT_BY_DATE = "ORDER BY g.create_date ";
+        final String SQL_SORT_BY_NAME = "ORDER BY g.name ";
         final String SQL_WHERE = "WHERE ";
-        final String SQL_JOIN = "INNER JOIN gift_tag gt ON g.id = gt.gift " +
-                "INNER JOIN tag t ON gt.tag = t.id ";
+        final String SQL_JOIN = "INNER JOIN gift_tag gt ON g.id = gt.gift_id " +
+                "INNER JOIN tag t ON gt.tag_id = t.id ";
         boolean whereIsUsed = false;
         StringBuilder getWithParamsSQL = new StringBuilder(SQL_GET_WITH_PARAMS);
         String tagName = params.getTagName();
@@ -72,13 +73,13 @@ public class GiftSqlBuilder {
                 whereIsUsed=true;
                 getWithParamsSQL.append(SQL_WHERE);
             } else getWithParamsSQL.append(SQL_AND);
-            getWithParamsSQL.append(format(SQL_NAME, name));
+            getWithParamsSQL.append(format(SQL_NAME, SQL_PERCENT+name+SQL_PERCENT));
         }
         String description = params.getDescription();
         if (description != null) {
             if (!whereIsUsed) getWithParamsSQL.append(SQL_WHERE);
             else getWithParamsSQL.append(SQL_AND);
-            getWithParamsSQL.append(format(SQL_DESCRIPTION, description));
+            getWithParamsSQL.append(format(SQL_DESCRIPTION, SQL_PERCENT+description+SQL_PERCENT));
         }
         SortBy sortBy = params.getSortBy();
         if (sortBy != null) {

@@ -2,7 +2,7 @@ package by.zhigarev.model;
 
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Data
 public class Gift {
@@ -11,6 +11,6 @@ public class Gift {
     private String description;
     private Integer price;
     private Integer duration;
-    private LocalDate createDate;
-    private LocalDate lastUpdateDate;
+    private Instant createDate;
+    private Instant lastUpdateDate;
 }

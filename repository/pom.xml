@@ -38,6 +38,11 @@
             <version>1.4.200</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>by.zhigarev</groupId>
+            <artifactId>service</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
 </project>

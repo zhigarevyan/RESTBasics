@@ -27,8 +27,8 @@ public class GiftMapper implements RowMapper<Gift> {
         gift.setDescription(resultSet.getString(DESCRIPTION));
         gift.setPrice(resultSet.getInt(PRICE));
         gift.setDuration(resultSet.getInt(DURATION));
-        gift.setCreateDate(resultSet.getDate(CREATE_DATE).toLocalDate());
-        gift.setLastUpdateDate(resultSet.getDate(LAST_UPDATE_DATE).toLocalDate());
+        gift.setCreateDate(resultSet.getTimestamp(CREATE_DATE).toInstant());
+        gift.setLastUpdateDate(resultSet.getTimestamp(LAST_UPDATE_DATE).toInstant());
         return gift;
     }
 }
