@@ -1,13 +1,13 @@
 package by.zhigarev.dao;
 
-import by.zhigarev.dao.exception.DAOException;
+
 import by.zhigarev.model.Tag;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface TagDAO {
-    Tag createTag(String name) throws DAOException;
+    Tag createTag(String name);
 
     void deleteTagById(int id);
 

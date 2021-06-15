@@ -1,10 +1,8 @@
 package by.zhigarev.dao.impl;
 
 import by.zhigarev.dao.TagDAO;
-import by.zhigarev.dao.exception.DAOException;
-import by.zhigarev.dao.exception.impl.DuplicateTagException;
-import by.zhigarev.dao.util.TagMapper;
 import by.zhigarev.model.Tag;
+import by.zhigarev.util.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,13 +36,9 @@ public class TagDAOImpl implements TagDAO {
     }
 
     @Override
-    public Tag createTag(String name) throws DAOException {
-        if (!getTagByName(name).isPresent()) {
+    public Tag createTag(String name) {
             template.update(SQL_INSERT_TAG, name);
             return getTagByName(name).get();
-        } else {
-            throw new DuplicateTagException(MESSAGE_DUPLICATE_TAG);
-        }
     }
 
     @Override

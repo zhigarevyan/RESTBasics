@@ -11,6 +11,7 @@
     <modules>
         <module>repository</module>
         <module>service</module>
+        <module>controller</module>
     </modules>
 
     <properties>

@@ -2,23 +2,33 @@ package by.zhigarev.dao.impl;
 
 
 import by.zhigarev.dao.TagDAO;
-import by.zhigarev.dao.exception.DAOException;
-import by.zhigarev.dao.util.TagMapper;
 import by.zhigarev.model.Tag;
-import org.junit.jupiter.api.*;
+import by.zhigarev.util.TagDAOTestResolver;
+import by.zhigarev.util.TagMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(TagDAOTestResolver.class)
+@ComponentScan(basePackages = "by.zhigarev")
 class TagDAOImplTest {
-    private EmbeddedDatabase database;
+    private final EmbeddedDatabase database;
     private TagDAO tagDAO;
-    private TagMapper tagMapper = new TagMapper();
+    private final TagMapper tagMapper;
+
+    public TagDAOImplTest(EmbeddedDatabase database, TagMapper tagMapper) {
+        this.tagMapper = tagMapper;
+        this.database = database;
+    }
+
 
     private static final String TEST_NAME = "Test Name";
     private static final String DB_NAME_FIRST = "First Tag";
@@ -31,11 +41,11 @@ class TagDAOImplTest {
 
     @BeforeEach
     void setUp() {
-        database = new EmbeddedDatabaseBuilder()
+/*        database = new EmbeddedDatabaseBuilder()
                 .addDefaultScripts()
                 .setType(EmbeddedDatabaseType.H2)
-                .build();
-        tagDAO = new TagDAOImpl(database,tagMapper);
+                .build();*/
+        tagDAO = new TagDAOImpl(database, tagMapper);
 
     }
 
@@ -45,10 +55,10 @@ class TagDAOImplTest {
     }
 
     @Test
-    void createTag() throws DAOException {
+    void createTag() {
         Tag createdTag = tagDAO.createTag(TEST_NAME);
         assertNotNull(createdTag);
-        assertEquals(TEST_NAME,createdTag.getName());
+        assertEquals(TEST_NAME, createdTag.getName());
     }
 
     @Test
@@ -61,19 +71,19 @@ class TagDAOImplTest {
     @Test
     void updateTagById() {
         Tag updatedTag = tagDAO.updateTagById(TEST_NEW_NAME, TEST_ID_FIRST);
-        assertEquals(TEST_NEW_NAME,updatedTag.getName());
+        assertEquals(TEST_NEW_NAME, updatedTag.getName());
     }
 
     @Test
     void getTagById() {
         Tag tag = tagDAO.getTagById(TEST_ID_FIRST).get();
-        assertEquals(DB_NAME_FIRST,tag.getName());
+        assertEquals(DB_NAME_FIRST, tag.getName());
     }
 
     @Test
     void getTagByName() {
         Tag tag = tagDAO.getTagByName(DB_NAME_FIRST).get();
-        assertEquals(TEST_ID_FIRST,tag.getId());
+        assertEquals(TEST_ID_FIRST, tag.getId());
     }
 
     @Test
@@ -81,10 +91,10 @@ class TagDAOImplTest {
         List<Tag> tagList = tagDAO.getTagListByGiftId(TEST_ID_FIRST);
         Tag firstTag = tagList.get(0);
         Tag secondTag = tagList.get(1);
-        assertEquals(TEST_ID_FIRST,firstTag.getId());
-        assertEquals(TEST_ID_SECOND,secondTag.getId());
-        assertEquals(DB_NAME_FIRST,firstTag.getName());
-        assertEquals(DB_NAME_SECOND,secondTag.getName());
+        assertEquals(TEST_ID_FIRST, firstTag.getId());
+        assertEquals(TEST_ID_SECOND, secondTag.getId());
+        assertEquals(DB_NAME_FIRST, firstTag.getName());
+        assertEquals(DB_NAME_SECOND, secondTag.getName());
     }
 
     @Test
@@ -93,12 +103,12 @@ class TagDAOImplTest {
         Tag firstTag = tagList.get(0);
         Tag secondTag = tagList.get(1);
         Tag thirdTag = tagList.get(2);
-        assertEquals(TEST_ID_FIRST,firstTag.getId());
-        assertEquals(TEST_ID_SECOND,secondTag.getId());
-        assertEquals(TEST_ID_THIRD,thirdTag.getId());
-        assertEquals(DB_NAME_FIRST,firstTag.getName());
-        assertEquals(DB_NAME_SECOND,secondTag.getName());
-        assertEquals(DB_NAME_THIRD,thirdTag.getName());
+        assertEquals(TEST_ID_FIRST, firstTag.getId());
+        assertEquals(TEST_ID_SECOND, secondTag.getId());
+        assertEquals(TEST_ID_THIRD, thirdTag.getId());
+        assertEquals(DB_NAME_FIRST, firstTag.getName());
+        assertEquals(DB_NAME_SECOND, secondTag.getName());
+        assertEquals(DB_NAME_THIRD, thirdTag.getName());
 
     }
 }

@@ -1,23 +1,24 @@
 package by.zhigarev.dao.impl;
 
 import by.zhigarev.dao.GiftDAO;
-import by.zhigarev.dao.util.GiftMapper;
 import by.zhigarev.model.Gift;
+import by.zhigarev.util.GiftMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class GiftDAOImpl implements GiftDAO {
     private JdbcTemplate template;
     private GiftMapper mapper;
@@ -48,6 +49,7 @@ public class GiftDAOImpl implements GiftDAO {
         final int CREATE_DATE_INDEX = 5;
         final int LAST_UPDATE_DATE_INDEX = 6;
         final String ID_KEY = "id";
+        final String GENERATED_KEY = "GENERATED_KEY";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -62,8 +64,12 @@ public class GiftDAOImpl implements GiftDAO {
             ps.setTimestamp(LAST_UPDATE_DATE_INDEX, CURRENT_TIMESTAMP);
             return ps;
         }, keyHolder);
-
-        int id = (int) keyHolder.getKeys().get(ID_KEY);
+        int id;
+        if(keyHolder.getKeys().size()>1) {
+             id = (int) keyHolder.getKeys().get(ID_KEY);
+        }else {
+            id = keyHolder.getKey().intValue();
+        }
         return getGiftById(id).get();
     }
 

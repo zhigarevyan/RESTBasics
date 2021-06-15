@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>repository</artifactId>
+    <packaging>jar</packaging>
+    <name>repository</name>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
@@ -39,10 +41,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>by.zhigarev</groupId>
-            <artifactId>service</artifactId>
-            <version>1.0</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.3.8</version>
+            <scope>test</scope>
         </dependency>
+
     </dependencies>
 
 </project>

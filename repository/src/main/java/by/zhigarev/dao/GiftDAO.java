@@ -1,7 +1,6 @@
 package by.zhigarev.dao;
 
 import by.zhigarev.model.Gift;
-import by.zhigarev.model.Tag;
 
 import java.util.List;
 import java.util.Optional;

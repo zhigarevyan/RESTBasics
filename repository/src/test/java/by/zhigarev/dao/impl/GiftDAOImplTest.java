@@ -1,31 +1,25 @@
 package by.zhigarev.dao.impl;
 
 import by.zhigarev.dao.GiftDAO;
-import by.zhigarev.dao.util.GiftMapper;
-import by.zhigarev.dto.GiftDTO;
 import by.zhigarev.model.Gift;
-import by.zhigarev.util.GiftSQLQueryParameters;
-import by.zhigarev.util.GiftSqlBuilder;
-import by.zhigarev.util.SortBy;
-import by.zhigarev.util.SortOrientation;
+import by.zhigarev.util.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(GiftDAOTestResolver.class)
 class GiftDAOImplTest {
     private EmbeddedDatabase database;
     private GiftDAO giftDAO;
     private Gift giftCertificate;
-    private GiftMapper giftMapper = new GiftMapper();
-    private GiftSqlBuilder builder = new GiftSqlBuilder();
+    private GiftMapper giftMapper;
 
     private static final String TEST_NAME = "Test Gift";
     private static final String TEST_QUERY_NAME = "Gift";
@@ -38,13 +32,14 @@ class GiftDAOImplTest {
     private static final int TEST_PRICE = 10;
     private static final int TEST_DURATION = 10;
 
+    public GiftDAOImplTest(EmbeddedDatabase database, GiftMapper giftMapper) {
+        this.database = database;
+        this.giftMapper = giftMapper;
+    }
 
     @BeforeEach
     void setUp() {
-        database = new EmbeddedDatabaseBuilder()
-                .addDefaultScripts()
-                .setType(EmbeddedDatabaseType.H2)
-                .build();
+
         giftDAO = new GiftDAOImpl(database, giftMapper);
         giftCertificate = new Gift();
         giftCertificate.setName(TEST_NAME);
@@ -79,12 +74,12 @@ class GiftDAOImplTest {
     void updateGiftById() {
         Gift gift = giftDAO.getGiftById(TEST_ID).get();
 
-        GiftDTO giftDTO = new GiftDTO();
+        Gift giftForUpdate = new Gift();
 
-        giftDTO.setName(TEST_NAME);
-        giftDTO.setDescription(TEST_DESCRIPTION);
+        giftForUpdate.setName(TEST_NAME);
+        giftForUpdate.setDescription(TEST_DESCRIPTION);
 
-        String updateSql = builder.getUpdateSql(giftDTO);
+        String updateSql = GiftSqlBuilder.getUpdateSql(giftForUpdate);
 
         Gift updatedGift = giftDAO.updateGiftById(updateSql, TEST_ID);
         assertEquals(TEST_NAME,updatedGift.getName());
@@ -117,7 +112,7 @@ class GiftDAOImplTest {
         GiftSQLQueryParameters paramsTag = new GiftSQLQueryParameters();
         paramsTag.setTagName(SECOND_TAG_NAME);
 
-        String getWithParamsSQL1 = builder.getGetWithParamsSQL(paramsTag);
+        String getWithParamsSQL1 = GiftSqlBuilder.getGetWithParamsSQL(paramsTag);
         List<Gift> giftsByParams1 = giftDAO.getGiftsByParams(getWithParamsSQL1);
         assertEquals(COUNT_1,giftsByParams1.size());
 
@@ -125,7 +120,7 @@ class GiftDAOImplTest {
         paramsNameAndDescription.setName(TEST_QUERY_NAME);
         paramsNameAndDescription.setDescription(TEST_QUERY_DESCRIPTION);
 
-        String getWithParamsSQL2 = builder.getGetWithParamsSQL(paramsNameAndDescription);
+        String getWithParamsSQL2 = GiftSqlBuilder.getGetWithParamsSQL(paramsNameAndDescription);
         List<Gift> giftsByParams2 = giftDAO.getGiftsByParams(getWithParamsSQL2);
         assertEquals(COUNT_2,giftsByParams2.size());
 
@@ -133,11 +128,13 @@ class GiftDAOImplTest {
         paramsSortByAndOrientation.setSortBy(SortBy.NAME);
         paramsSortByAndOrientation.setSortOrientation(SortOrientation.DESC);
 
-        String getWithParamsSQL3 = builder.getGetWithParamsSQL(paramsSortByAndOrientation);
+        String getWithParamsSQL3 = GiftSqlBuilder.getGetWithParamsSQL(paramsSortByAndOrientation);
         List<Gift> giftsByParams3 = giftDAO.getGiftsByParams(getWithParamsSQL3);
         Gift gift = giftsByParams3.get(0);
         assertEquals(SECOND_GIFT_NAME,gift.getName());
 
 
     }
+
+
 }
