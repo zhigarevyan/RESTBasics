@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Class is implementation of {@link RowMapper}, that links Gift with ResultSet.
+ */
 @Component
 public class GiftMapper implements RowMapper<Gift> {
     private static final String ID = "id";
@@ -17,7 +20,14 @@ public class GiftMapper implements RowMapper<Gift> {
     private static final String CREATE_DATE = "create_date";
     private static final String LAST_UPDATE_DATE = "last_update_date";
 
-
+    /**
+     * Links ResultSet with Gift entity
+     *
+     * @param resultSet is {@link ResultSet} object from JDBC request.
+     * @param i         is id of the row.
+     * @return {@link Gift} entity from database.
+     * @throws SQLException when something goes wrong.
+     */
     @Override
     public Gift mapRow(ResultSet resultSet, int i) throws SQLException {
 

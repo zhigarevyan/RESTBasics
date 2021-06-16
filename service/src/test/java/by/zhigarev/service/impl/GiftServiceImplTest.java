@@ -3,6 +3,8 @@ package by.zhigarev.service.impl;
 import by.zhigarev.dao.GiftDAO;
 import by.zhigarev.dao.TagDAO;
 import by.zhigarev.dto.GiftDTO;
+import by.zhigarev.exeption.impl.InvalidDataException;
+import by.zhigarev.exeption.impl.NoSuchGiftException;
 import by.zhigarev.model.Gift;
 import by.zhigarev.model.Tag;
 import by.zhigarev.util.GiftSQLQueryParameters;
@@ -18,8 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
@@ -93,6 +94,12 @@ class GiftServiceImplTest {
     }
 
     @Test
+    void createGiftInvalidDataException(){
+        GiftDTO giftDTO = new GiftDTO();
+        assertThrows(InvalidDataException.class,() -> giftService.createGift(giftDTO));
+    }
+
+    @Test
     void deleteGiftById() {
         given(giftDAO.getGiftById(TEST_ID_1)).willReturn(Optional.of(gift1));
         giftService.deleteGiftById(TEST_ID_1);
@@ -100,6 +107,11 @@ class GiftServiceImplTest {
         verify(giftDAO,times(1)).deleteGiftById(TEST_ID_1);
         verify(giftDAO,times(1)).deleteGiftTagByGiftId(TEST_ID_1);
 
+    }
+    @Test
+    void deleteGiftByIdNoSuchGiftException(){
+        given(giftDAO.getGiftById(TEST_ID_1)).willReturn(Optional.empty());
+        assertThrows(NoSuchGiftException.class,() -> giftService.deleteGiftById(TEST_ID_1));
     }
 
     @Test
@@ -110,12 +122,22 @@ class GiftServiceImplTest {
         GiftDTO updatedGift = giftService.updateGiftById(giftDTO, TEST_ID_1);
         assertEquals(giftDTO,updatedGift);
     }
+    @Test
+    void updateGiftByIdNoSuchGiftException(){
+        given(giftDAO.getGiftById(TEST_ID_1)).willReturn(Optional.empty());
+        assertThrows(NoSuchGiftException.class,() -> giftService.updateGiftById(giftDTO,TEST_ID_1));
+    }
 
     @Test
     void getGiftById() {
         given(giftDAO.getGiftById(TEST_ID_1)).willReturn(Optional.of(gift1));
         GiftDTO giftById = giftService.getGiftById(TEST_ID_1);
         assertEquals(giftDTO,giftById);
+    }
+    @Test
+    void getGiftByIdNoSuchGiftException(){
+        given(giftDAO.getGiftById(TEST_ID_1)).willReturn(Optional.empty());
+        assertThrows(NoSuchGiftException.class,() -> giftService.getGiftById(TEST_ID_1));
     }
 
     @Test

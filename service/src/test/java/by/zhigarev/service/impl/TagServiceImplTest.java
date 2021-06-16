@@ -2,6 +2,9 @@ package by.zhigarev.service.impl;
 
 import by.zhigarev.dao.TagDAO;
 import by.zhigarev.dto.TagDTO;
+import by.zhigarev.exeption.impl.DuplicateTagException;
+import by.zhigarev.exeption.impl.InvalidDataException;
+import by.zhigarev.exeption.impl.NoSuchTagException;
 import by.zhigarev.model.Tag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,10 +62,29 @@ class TagServiceImplTest {
     }
 
     @Test
+    void createTagDuplicateTagException(){
+        given(tagDAO.getTagByName(TEST_NAME)).willReturn(Optional.of(tag));
+        assertThrows(DuplicateTagException.class,() -> tagService.createTag(TEST_NAME));
+    }
+
+    @Test
     void deleteTagById() {
         given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.of(tag));
         tagService.deleteTagById(TEST_ID);
         verify(tagDAO, times(1)).deleteTagById(TEST_ID);
+    }
+
+    @Test
+    void deleteTagByIdTagNoSuchTagException(){
+        given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.empty());
+        assertThrows(NoSuchTagException.class,() -> tagService.deleteTagById(TEST_ID));
+    }
+
+    @Test
+    void deleteTagByIdTagValidationException(){
+        final int ID = -1;
+        given(tagDAO.getTagById(ID)).willReturn(Optional.of(tag));
+        assertThrows(InvalidDataException.class,() -> tagService.deleteTagById(ID));
     }
 
     @Test
@@ -75,6 +96,18 @@ class TagServiceImplTest {
     }
 
     @Test
+    void getTagByIdNoSuchTagException() {
+        given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.empty());
+        assertThrows(NoSuchTagException.class,()-> tagService.getTagById(TEST_ID));
+    }
+
+    @Test
+    void getTagByIdInvalidDataException() {
+        final int ID = -1;
+        assertThrows(InvalidDataException.class,()-> tagService.getTagById(ID));
+    }
+
+    @Test
     void getTagByName() {
         given(tagDAO.getTagByName(TEST_NAME)).willReturn(Optional.of(tag));
         TagDTO tagDTO = tagService.getTagByName(TEST_NAME);
@@ -83,11 +116,30 @@ class TagServiceImplTest {
     }
 
     @Test
+    void getTagByNameNoSuchTagException() {
+        given(tagDAO.getTagByName(TEST_NAME)).willReturn(Optional.empty());
+        assertThrows(NoSuchTagException.class,()-> tagService.getTagByName(TEST_NAME));
+    }
+
+    @Test
+    void getTagByNameInvalidDataException() {
+        final String NAME = "";
+        assertThrows(InvalidDataException.class,()-> tagService.getTagByName(NAME));
+    }
+
+
+    @Test
     void getTagListByGiftId() {
         given(tagDAO.getTagListByGiftId(TEST_ID)).willReturn(tagList);
         List<TagDTO> tagListByGiftId = tagService.getTagListByGiftId(TEST_ID);
         assertIterableEquals(tagDTOList,tagListByGiftId);
 
+    }
+
+    @Test
+    void getTagListByGiftIdInvalidDataException() {
+        final int ID = -1;
+        assertThrows(InvalidDataException.class,()-> tagService.getTagListByGiftId(ID));
     }
 
     @Test

@@ -11,12 +11,14 @@ import javax.servlet.ServletRegistration;
 
 public class WebAppInitializer implements WebApplicationInitializer {
     private static final String BASE_PACKAGES = "by.zhigarev";
+    private static final String PROD_PROFILE = "prod";
 
     @Override
     public void onStartup(ServletContext servletContext) {
         AnnotationConfigWebApplicationContext context =
                 new AnnotationConfigWebApplicationContext();
 
+        context.getEnvironment().setActiveProfiles(PROD_PROFILE);
         context.scan(BASE_PACKAGES);
         servletContext.addListener(new ContextLoaderListener(context));
 

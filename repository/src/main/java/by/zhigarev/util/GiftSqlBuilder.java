@@ -7,10 +7,18 @@ import java.time.Instant;
 
 import static java.lang.String.format;
 import static org.springframework.util.StringUtils.hasLength;
-
+/**
+ * Class is builder, that transforms parameters from GET and Update request into SQL query.
+ */
 public class GiftSqlBuilder {
 
-
+    /**
+     * Transforms parameters from request into SQL query.
+     *
+     * @param gift is {@link Gift} object with parameters from
+     *                                      request.
+     * @return String that contains SQL query.
+     */
     public static String getUpdateSql(Gift gift) {
         final String SQL_UPDATE = "update gift set ";
         final String SQL_SET_NAME = "name = '%s' ";
@@ -43,7 +51,13 @@ public class GiftSqlBuilder {
         updateSQl.append(SQL_SET_WHERE_ID);
         return updateSQl.toString();
     }
-
+    /**
+     * Transforms parameters from request into SQL query.
+     *
+     * @param params is {@link GiftSQLQueryParameters} object with parameters from
+     *                                      request.
+     * @return String that contains SQL query.
+     */
     public static String getGetWithParamsSQL(GiftSQLQueryParameters params) {
         final String SQL_GET_WITH_PARAMS = "select g.id, g.name, g.description, g.price," +
                 "g.duration, g.create_date, g.last_update_date from gift g ";
@@ -94,23 +108,4 @@ public class GiftSqlBuilder {
 
         return getWithParamsSQL.toString();
     }
-
-    public static void main(String[] args) {
-        Gift dto = new Gift();
-        dto.setName("aaa");
-        dto.setPrice(12);
-        dto.setId(1);
-        dto.setDescription("sdfsdf");
-        String updateSql = new GiftSqlBuilder().getUpdateSql(dto);
-        System.out.println(updateSql);
-        GiftSQLQueryParameters giftSQLQueryParameters = new GiftSQLQueryParameters();
-        //giftSQLQueryParameters.setName("1");
-        giftSQLQueryParameters.setDescription("1");
-        giftSQLQueryParameters.setTagName("tag");
-        giftSQLQueryParameters.setSortOrientation(SortOrientation.ASC);
-        giftSQLQueryParameters.setSortBy(SortBy.DATE);
-        String getWithParamsSQL = new GiftSqlBuilder().getGetWithParamsSQL(giftSQLQueryParameters);
-        System.out.println(getWithParamsSQL);
-    }
-
 }

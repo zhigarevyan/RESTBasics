@@ -14,12 +14,13 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 @ExtendWith(GiftDAOTestResolver.class)
 class GiftDAOImplTest {
-    private EmbeddedDatabase database;
+    private final EmbeddedDatabase database;
     private GiftDAO giftDAO;
     private Gift giftCertificate;
-    private GiftMapper giftMapper;
+    private final GiftMapper giftMapper;
 
     private static final String TEST_NAME = "Test Gift";
     private static final String TEST_QUERY_NAME = "Gift";
