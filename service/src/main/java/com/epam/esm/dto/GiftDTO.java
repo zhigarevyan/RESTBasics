@@ -16,15 +16,16 @@ public class GiftDTO {
     private String description;
     private Integer price;
     private Integer duration;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private Instant createDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private Instant lastUpdateDate;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> tagList;
 
-    public void setTagList(List<Tag> tagList) {
+    public void setTagListWithTags(List<Tag> tagList) {
         this.tagList = new ArrayList<>();
         tagList.forEach(tag -> this.tagList.add(tag.getName()));
+    }
+
+    public void setTagList(List<String> tagList){
+        this.tagList = tagList;
     }
 }

@@ -67,7 +67,7 @@ class GiftServiceTest {
         giftDTO.setDescription(TEST_DESCRIPTION);
         giftDTO.setDuration(TEST_DURATION);
         giftDTO.setPrice(TEST_PRICE);
-        giftDTO.setTagList(new ArrayList<>());
+        giftDTO.setTagList(new ArrayList<String>());
 
         giftDTOList = new ArrayList<>();
         giftDTOList.add(giftDTO);

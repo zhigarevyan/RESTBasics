@@ -193,7 +193,7 @@ public class GiftService {
     private GiftDTO setTagsAndConvertToDTO(Gift gift) {
         List<Tag> tagListByGiftId = tagDAO.getTagListByGiftId(gift.getId());
         GiftDTO giftDTO = GiftEntityDTOMapper.toDTO(gift);
-        giftDTO.setTagList(tagListByGiftId);
+        giftDTO.setTagListWithTags(tagListByGiftId);
         return giftDTO;
     }
 
