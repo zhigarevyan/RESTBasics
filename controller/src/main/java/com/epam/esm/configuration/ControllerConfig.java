@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
@@ -20,7 +21,7 @@ import java.util.Locale;
 @Configuration
 @ComponentScan(basePackages = "com.epam.esm")
 @EnableTransactionManagement
-public class ControllerConfig {
+public class ControllerConfig implements WebMvcConfigurer {
     private static final String DEFAULT_ENCODING = "UTF-8";
     private static final String BASENAME = "classpath:error_messages";
 

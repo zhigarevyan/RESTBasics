@@ -54,7 +54,7 @@ public class GiftService {
      * Public constructor that receives giftDAO and tagDAO
      *
      * @param giftDAO is {@link GiftDAO} interface providing DAO methods.
-     * @param tagDAO             is {@link TagDAO} interface providing DAO methods.
+     * @param tagDAO  is {@link TagDAO} interface providing DAO methods.
      */
     @Autowired
     public GiftService(GiftDAO giftDAO, TagDAO tagDAO) {
@@ -112,6 +112,8 @@ public class GiftService {
 
         String updateSql = GiftSqlBuilder.getUpdateSql(GiftEntityDTOMapper.toEntity(giftDTO));
         Gift gift = giftDAO.updateGiftById(updateSql, id);
+        giftDAO.deleteGiftTagByGiftId(id);
+        insertTagsIfNotExists(id, giftDTO.getTagList());
         return setTagsAndConvertToDTO(gift);
 
     }
@@ -163,6 +165,7 @@ public class GiftService {
         }
         return giftDTOList;
     }
+
     /**
      * Invokes DAO method to create GiftTag
      *
@@ -177,6 +180,7 @@ public class GiftService {
             giftDAO.createGiftTag(giftId, tagId);
         }
     }
+
     /**
      * Invokes DAO method to delete GiftTag
      *

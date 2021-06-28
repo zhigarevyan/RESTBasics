@@ -41,10 +41,6 @@ class TagDAOImplTest {
 
     @BeforeEach
     void setUp() {
-/*        database = new EmbeddedDatabaseBuilder()
-                .addDefaultScripts()
-                .setType(EmbeddedDatabaseType.H2)
-                .build();*/
         tagDAO = new TagDAOImpl(database, tagMapper);
 
     }

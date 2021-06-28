@@ -13,4 +13,6 @@ public class Gift {
     private Integer duration;
     private Instant createDate;
     private Instant lastUpdateDate;
+
+
 }

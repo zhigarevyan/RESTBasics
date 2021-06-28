@@ -9,4 +9,5 @@ public class GiftSQLQueryParameters {
     private String tagName;
     private SortBy sortBy;
     private SortOrientation sortOrientation;
+
 }
