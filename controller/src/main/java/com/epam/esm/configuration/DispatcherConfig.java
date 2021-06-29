@@ -12,10 +12,12 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 @EnableWebMvc
 @ComponentScan(basePackages = {"com.epam.esm"})
 public class DispatcherConfig implements WebMvcConfigurer {
+/*
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();
     }
+*/
 
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {

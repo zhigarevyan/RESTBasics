@@ -2,12 +2,15 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDAO;
 import com.epam.esm.model.Tag;
-import com.epam.esm.util.TagMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.epam.esm.model.Tag_;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
@@ -18,63 +21,16 @@ import java.util.Optional;
  */
 @Repository
 public class TagDAOImpl implements TagDAO {
-    /**
-     * An object of {@link JdbcTemplate}
-     */
-    private JdbcTemplate template;
-    /**
-     * An object of {@link TagMapper}
-     */
-    private TagMapper mapper;
-    /**
-     * Query for database to create a tag with provided name
-     */
-    private static final String SQL_INSERT_TAG = "insert into tag(name) values(?)";
-    /**
-     * Query for database to get the tag with provided id
-     */
-    private static final String SQL_GET_TAG_BY_ID = "select * from tag where id = ?";
-    /**
-     * Query for database to get the tags that linked to a gift with provided name
-     */
-    private static final String SQL_GET_TAG_BY_NAME = "select * from tag where name = ?";
-    /**
-     * Query for database to get all tags
-     */
-    private static final String SQL_GET_ALL_TAGS = "select * from tag";
-    /**
-     * Query for database to delete a tag with provided id
-     */
-    private static final String SQL_DELETE_TAG_BY_ID = "delete from tag where id = ?";
-    /**
-     * Query for database to get the tags that linked to a gift with provided id
-     */
-    private static final String SQL_GET_TAG_BY_GIFT_ID = "select * from tag t join gift_tag gt on t.id = gt.tag_id " +
-            "where gt.gift_id = ?";
+    @PersistenceContext
+    EntityManager entityManager;
 
-
-    /**
-     * Constructor that requires dataSource
-     *
-     * @param dataSource is {@link DataSource} object that manages connections
-     * @param mapper     is {@link TagMapper} object that map entities
-     */
-    @Autowired
-    public TagDAOImpl(DataSource dataSource, TagMapper mapper) {
-        this.template = new JdbcTemplate(dataSource);
-        this.mapper = mapper;
-    }
-
-    /**
-     * Connects to database and add an new Tag.
-     *
-     * @param name is Tag name value
-     * @return Created {@link Tag} entity from database
-     */
     @Override
     public Tag createTag(String name) {
-        template.update(SQL_INSERT_TAG, name);
-        return getTagByName(name).get();
+        Tag tag = new Tag();
+        tag.setName(name);
+        entityManager.persist(tag);
+        entityManager.detach(tag);
+        return tag;
     }
 
     /**
@@ -84,7 +40,8 @@ public class TagDAOImpl implements TagDAO {
      */
     @Override
     public void deleteTagById(int id) {
-        template.update(SQL_DELETE_TAG_BY_ID, id);
+        Tag tag = entityManager.find(Tag.class, id);
+        entityManager.remove(tag);
     }
 
     /**
@@ -95,11 +52,8 @@ public class TagDAOImpl implements TagDAO {
      */
     @Override
     public Optional<Tag> getTagById(int id) {
-        try {
-            return Optional.ofNullable(template.queryForObject(SQL_GET_TAG_BY_ID, mapper, id));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        Tag tag = entityManager.find(Tag.class, id);
+        return Optional.ofNullable(tag);
     }
 
     /**
@@ -110,11 +64,12 @@ public class TagDAOImpl implements TagDAO {
      */
     @Override
     public Optional<Tag> getTagByName(String name) {
-        try {
-            return Optional.ofNullable(template.queryForObject(SQL_GET_TAG_BY_NAME, mapper, name));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> query = criteriaBuilder.createQuery(Tag.class);
+        Root<Tag> root = query.from(Tag.class);
+        query.select(root).where(criteriaBuilder.equal(root.get(Tag_.NAME), name));
+        Tag tag = entityManager.createQuery(query).getSingleResult();
+        return Optional.ofNullable(tag);
     }
 
     /**
@@ -125,8 +80,12 @@ public class TagDAOImpl implements TagDAO {
      */
     @Override
     public List<Tag> getTagListByGiftId(int giftId) {
-        return template.query(SQL_GET_TAG_BY_GIFT_ID, mapper, giftId);
+        final String GET_TAG_LIST_BY_GIFT_ID_QUERY = "getTagListByGiftId";
+        final String GIFT_ID_PARAMETER = "giftId";
+        Query namedQuery = entityManager.createNamedQuery(GET_TAG_LIST_BY_GIFT_ID_QUERY);
+        namedQuery.setParameter(GIFT_ID_PARAMETER, giftId);
 
+        return namedQuery.getResultList();
     }
 
     /**
@@ -136,7 +95,11 @@ public class TagDAOImpl implements TagDAO {
      */
     @Override
     public List<Tag> getAllTags() {
-        return template.query(SQL_GET_ALL_TAGS, mapper);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> query = criteriaBuilder.createQuery(Tag.class);
+        Root<Tag> root = query.from(Tag.class);
+        query.select(root);
+        return entityManager.createQuery(query).getResultList();
     }
 
 }

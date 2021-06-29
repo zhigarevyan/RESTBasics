@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Locale;
 
 @Configuration
-@ComponentScan(basePackages = "com.epam.esm")
 @EnableTransactionManagement
 public class ControllerConfig implements WebMvcConfigurer {
     private static final String DEFAULT_ENCODING = "UTF-8";
     private static final String BASENAME = "classpath:error_messages";
 
+/*
     @Bean
     public LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver acceptHeaderLocaleResolver = new AcceptHeaderLocaleResolver();
@@ -34,6 +34,7 @@ public class ControllerConfig implements WebMvcConfigurer {
         acceptHeaderLocaleResolver.setSupportedLocales(locales);
         return acceptHeaderLocaleResolver;
     }
+*/
 
     @Bean
     public View jsonTemplate() {
