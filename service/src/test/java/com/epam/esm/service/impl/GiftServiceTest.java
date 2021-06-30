@@ -17,6 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,12 +57,16 @@ class GiftServiceTest {
 
     @BeforeEach
     void setUp() {
+        Instant now = Instant.now();
+
         gift1 = new Gift();
         gift1.setId(TEST_ID_1);
         gift1.setName(TEST_NAME_1);
         gift1.setDescription(TEST_DESCRIPTION);
         gift1.setDuration(TEST_DURATION);
         gift1.setPrice(TEST_PRICE);
+        gift1.setCreateDate(now);
+        gift1.setLastUpdateDate(now);
 
         giftDTO = new GiftDTO();
         giftDTO.setId(TEST_ID_1);
@@ -67,6 +74,8 @@ class GiftServiceTest {
         giftDTO.setDescription(TEST_DESCRIPTION);
         giftDTO.setDuration(TEST_DURATION);
         giftDTO.setPrice(TEST_PRICE);
+        giftDTO.setCreateDate(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+        giftDTO.setLastUpdateDate(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
         giftDTO.setTagList(new ArrayList<String>());
 
         giftDTOList = new ArrayList<>();
@@ -118,9 +127,9 @@ class GiftServiceTest {
     @Test
     void updateGiftById() {
         given(giftDAO.getGiftById(TEST_ID_1)).willReturn(Optional.of(gift1));
-        given(giftDAO.updateGiftById(any(),anyInt())).willReturn(gift1);
 
-        GiftDTO updatedGift = giftService.updateGiftById(giftDTO, TEST_ID_1);
+        giftService.updateGiftById(giftDTO, TEST_ID_1);
+        GiftDTO updatedGift = giftService.getGiftById(TEST_ID_1);
         assertEquals(giftDTO,updatedGift);
     }
     @Test

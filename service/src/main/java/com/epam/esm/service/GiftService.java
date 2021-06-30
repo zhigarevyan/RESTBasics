@@ -104,18 +104,15 @@ public class GiftService {
      * @throws NoSuchGiftException if no Gift with provided id founded
      */
     @Transactional
-    public GiftDTO updateGiftById(GiftDTO giftDTO, int id) {
+    public void updateGiftById(GiftDTO giftDTO, int id) {
         if (giftDAO.getGiftById(id).isEmpty()) {
             throw new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, id),
                     String.format(ERROR_CODE_NO_SUCH_GIFT, id));
         }
-
         String updateSql = GiftSqlBuilder.getUpdateSql(GiftEntityDTOMapper.toEntity(giftDTO));
-        Gift gift = giftDAO.updateGiftById(updateSql, id);
+        giftDAO.updateGiftById(updateSql, id);
         giftDAO.deleteGiftTagByGiftId(id);
         insertTagsIfNotExists(id, giftDTO.getTagList());
-        return setTagsAndConvertToDTO(gift);
-
     }
 
     /**
@@ -133,7 +130,6 @@ public class GiftService {
                     String.format(ERROR_CODE_NO_SUCH_GIFT, id));
         }
         return setTagsAndConvertToDTO(giftById.get());
-
     }
 
     /**

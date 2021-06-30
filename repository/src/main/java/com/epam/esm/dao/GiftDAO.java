@@ -1,6 +1,7 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.model.Gift;
+import com.epam.esm.util.GiftSQLQueryParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public interface GiftDAO {
      * @param id        is Gift ID value.
      * @return updated {@link Gift} entity
      */
-    Gift updateGiftById(String updateSQL, int id);
+    void updateGiftById(String updateSQL, int id);
 
     /**
      * Connects to database and returns Gift by ID.

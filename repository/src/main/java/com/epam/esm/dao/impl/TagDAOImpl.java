@@ -64,12 +64,17 @@ public class TagDAOImpl implements TagDAO {
      */
     @Override
     public Optional<Tag> getTagByName(String name) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Tag> query = criteriaBuilder.createQuery(Tag.class);
-        Root<Tag> root = query.from(Tag.class);
-        query.select(root).where(criteriaBuilder.equal(root.get(Tag_.NAME), name));
-        Tag tag = entityManager.createQuery(query).getSingleResult();
-        return Optional.ofNullable(tag);
+        final String QUERY_GET_TAG_BY_NAME = "getTagByName";
+        final String TAG_NAME_PARAMETER = "tagName";
+        Optional<Tag> tag = Optional.empty();
+
+        Query namedQuery = entityManager.createNamedQuery(QUERY_GET_TAG_BY_NAME);
+        namedQuery.setParameter(TAG_NAME_PARAMETER,name);
+        List<Tag> resultList = namedQuery.getResultList();
+        if (!resultList.isEmpty()) {
+            tag = Optional.of(resultList.get(0));
+        }
+        return tag;
     }
 
     /**

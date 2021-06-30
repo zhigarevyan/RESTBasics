@@ -46,7 +46,8 @@ public class GiftController {
 
     @PutMapping("/{id}")
     public GiftDTO updateGift(@RequestBody GiftDTO giftDTO, @PathVariable int id) {
-        return giftService.updateGiftById(giftDTO, id);
+        giftService.updateGiftById(giftDTO, id);
+        return giftService.getGiftById(id);
     }
 
     @DeleteMapping("/{id}")

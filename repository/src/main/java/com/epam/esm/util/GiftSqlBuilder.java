@@ -20,14 +20,14 @@ public class GiftSqlBuilder {
      * @return String that contains SQL query.
      */
     public static String getUpdateSql(Gift gift) {
-        final String SQL_UPDATE = "update gift set ";
+        final String SQL_UPDATE = "update Gift set ";
         final String SQL_SET_NAME = "name = '%s' ";
         final String SQL_SET_DESCRIPTION = "description = '%s' ";
         final String SQL_SET_PRICE = "price = %d ";
         final String SQL_SET_DURATION = "duration = %d ";
         final String SQL_SET_LAST_UPDATE_DATE = "last_update_date = '%s' ";
         final String SQL_SET_COMMA = " , ";
-        final String SQL_SET_WHERE_ID = "where id = ? ";
+        final String SQL_SET_WHERE_ID = "where id = :giftId ";
 
         StringBuilder updateSQl = new StringBuilder(SQL_UPDATE);
 
@@ -59,8 +59,7 @@ public class GiftSqlBuilder {
      * @return String that contains SQL query.
      */
     public static String getGetWithParamsSQL(GiftSQLQueryParameters params) {
-        final String SQL_GET_WITH_PARAMS = "select g.id, g.name, g.description, g.price," +
-                "g.duration, g.create_date, g.last_update_date from gift g ";
+        final String SQL_GET_WITH_PARAMS = "select g from Gift g ";
         final String SQL_TAG_NAME = "where t.name = '%s' ";
         final String SQL_NAME = "g.name like '%s' ";
         final String SQL_DESCRIPTION = "g.description like '%s' ";
@@ -76,6 +75,11 @@ public class GiftSqlBuilder {
         boolean whereIsUsed = false;
         StringBuilder getWithParamsSQL = new StringBuilder(SQL_GET_WITH_PARAMS);
         String tagName = params.getTagName();
+
+
+
+
+
         if (tagName != null) {
             whereIsUsed = true;
             getWithParamsSQL.append(SQL_JOIN);

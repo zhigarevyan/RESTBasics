@@ -12,6 +12,17 @@ import java.time.Instant;
 @Data
 @DynamicUpdate
 @NoArgsConstructor
+@NamedNativeQueries(
+        {
+                @NamedNativeQuery(
+                        name = "deleteGiftTagByGiftId",
+                        query = "DELETE FROM gift_tag WHERE (gift_id = :giftId)"),
+                @NamedNativeQuery(
+                        name = "createGiftTag",
+                        query = "INSERT INTO gift_tag(gift_id, tag_id) VALUES (:giftId,:tagId)")
+
+        }
+)
 public class Gift {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
