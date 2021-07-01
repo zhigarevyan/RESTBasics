@@ -1,10 +1,12 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dao.GiftDAO;
 import com.epam.esm.dao.TagDAO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exeption.impl.DuplicateTagException;
 import com.epam.esm.exeption.impl.InvalidDataException;
 import com.epam.esm.exeption.impl.NoSuchTagException;
+import com.epam.esm.model.Gift;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,10 +29,13 @@ import static org.mockito.Mockito.verify;
 class TagServiceTest {
     @Mock
     private TagDAO tagDAO;
+    @Mock
+    private GiftDAO giftDAO;
     @InjectMocks
     private TagService tagService;
 
     private Tag tag;
+    private Gift gift;
     private List<Tag> tagList;
     private List<TagDTO> tagDTOList;
     private static final Integer TEST_ID = 1;
@@ -39,6 +44,8 @@ class TagServiceTest {
 
     @BeforeEach
     void setUp() {
+        gift = new Gift();
+
         tag = new Tag();
         tag.setId(TEST_ID);
         tag.setName(TEST_NAME);
@@ -52,7 +59,7 @@ class TagServiceTest {
         tagDTO.setName(TEST_NAME);
         tagDTOList.add(tagDTO);
 
-        tagService = new TagService(tagDAO);
+        tagService = new TagService(tagDAO,giftDAO);
     }
 
     @Test
@@ -132,6 +139,7 @@ class TagServiceTest {
     @Test
     void getTagListByGiftId() {
         given(tagDAO.getTagListByGiftId(TEST_ID)).willReturn(tagList);
+        given(giftDAO.getGiftById(TEST_ID)).willReturn(Optional.of(gift));
         List<TagDTO> tagListByGiftId = tagService.getTagListByGiftId(TEST_ID);
         assertIterableEquals(tagDTOList,tagListByGiftId);
 

@@ -1,6 +1,7 @@
 package com.epam.esm.util;
 
 import com.epam.esm.dto.GiftDTO;
+import com.epam.esm.dto.OrderDTO;
 
 /**
  * Class is Validator that validates received data
@@ -41,4 +42,10 @@ public class Validator {
     }
 
 
+    public static boolean isValidOrderDTO(OrderDTO orderDTO) {
+        return isValidNumber(orderDTO.getPrice())&&
+                isValidNumber(orderDTO.getGiftID())&&
+                isValidNumber(orderDTO.getUserID());
+
+    }
 }

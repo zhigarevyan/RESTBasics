@@ -65,9 +65,7 @@ public class GiftEntityDTOMapper {
      */
     public static List<GiftDTO> toDTO(List<Gift> gifts) {
         List<GiftDTO> dtoList = new ArrayList<>();
-        for (Gift gift : gifts) {
-            dtoList.add(toDTO(gift));
-        }
+        gifts.forEach(gift -> dtoList.add(toDTO(gift)));
         return dtoList;
     }
 }

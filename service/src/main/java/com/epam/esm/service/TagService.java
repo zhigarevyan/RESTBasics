@@ -1,9 +1,11 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dao.GiftDAO;
 import com.epam.esm.dao.TagDAO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exeption.impl.DuplicateTagException;
 import com.epam.esm.exeption.impl.InvalidDataException;
+import com.epam.esm.exeption.impl.NoSuchGiftException;
 import com.epam.esm.exeption.impl.NoSuchTagException;
 import com.epam.esm.model.Tag;
 import com.epam.esm.util.TagEntityDTOMapper;
@@ -55,18 +57,30 @@ public class TagService {
      */
     private static final String ERROR_CODE_NO_SUCH_TAG_BY_NAME = "0202404";
     /**
+     * Error message when Gift wasn't found by id
+     */
+    private static final String MESSAGE_NO_SUCH_GIFT_EXCEPTION = "No such gift with id - %d exception";
+    /**
+     * Error code when Gift wasn't found by id
+     */
+    private static final String ERROR_CODE_NO_SUCH_GIFT = "0102404_%d";
+    /**
      * An object of {@link TagDAO}
      */
     private final TagDAO tagDAO;
-
+    /**
+     * An object of {@link GiftDAO}
+     */
+    private final GiftDAO giftDAO;
     /**
      * Public constructor that receives tagDAO
      *
      * @param tagDAO is {@link TagDAO} interface providing DAO methods.
      */
     @Autowired
-    public TagService(TagDAO tagDAO) {
+    public TagService(TagDAO tagDAO, GiftDAO giftDAO) {
         this.tagDAO = tagDAO;
+        this.giftDAO = giftDAO;
     }
 
     /**
@@ -79,12 +93,12 @@ public class TagService {
      */
     @Transactional
     public TagDTO createTag(String name) {
+        if (!Validator.isValidString(name)) {
+            throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
+        }
         if (tagDAO.getTagByName(name).isPresent()) {
             throw new DuplicateTagException(String.format(MESSAGE_DUPLICATE_TAG_EXCEPTION, name),
                     ERROR_CODE_DUPLICATE_TAG);
-        }
-        if (!Validator.isValidString(name)) {
-            throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
         }
         return TagEntityDTOMapper.toDTO(tagDAO.createTag(name));
     }
@@ -153,10 +167,16 @@ public class TagService {
      *
      * @param giftId is id of GiftCertificate.
      * @return List of {@link TagDTO} objects with tag data.
+     * @throws NoSuchGiftException   if no Gift with provided id founded
+     * @throws InvalidDataException if data failed validation
      */
     public List<TagDTO> getTagListByGiftId(int giftId) {
         if (!Validator.isValidNumber(giftId)) {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
+        }
+        if(giftDAO.getGiftById(giftId).isEmpty()){
+            throw new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION,giftId),
+                    String.format(ERROR_CODE_NO_SUCH_GIFT,giftId));
         }
         return TagEntityDTOMapper.toDTO(tagDAO.getTagListByGiftId(giftId));
     }

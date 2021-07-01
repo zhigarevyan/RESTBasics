@@ -29,9 +29,7 @@ public class TagEntityDTOMapper {
      */
     public static List<TagDTO> toDTO(List<Tag> tagList) {
         List<TagDTO> tagDTOList = new ArrayList<>();
-        for (Tag tag : tagList) {
-            tagDTOList.add(toDTO(tag));
-        }
+        tagList.forEach(tag -> tagDTOList.add(toDTO(tag)));
         return tagDTOList;
     }
 }
