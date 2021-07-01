@@ -7,14 +7,6 @@ public class NoSuchUserException extends ServiceException {
         super(message, errorCode);
     }
 
-    public NoSuchUserException(String message, Throwable cause, String errorCode) {
-        super(message, cause, errorCode);
-    }
-
-    public NoSuchUserException(Throwable cause, String errorCode) {
-        super(cause, errorCode);
-    }
-
     @Override
     public String getErrorCode() {
         return super.getErrorCode();
@@ -24,19 +16,5 @@ public class NoSuchUserException extends ServiceException {
     public void setErrorCode(String errorCode) {
         super.setErrorCode(errorCode);
     }
-
-    public NoSuchUserException() {
-    }
-
-    public NoSuchUserException(String message) {
-        super(message);
-    }
-
-    public NoSuchUserException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NoSuchUserException(Throwable cause) {
-        super(cause);
-    }
+    
 }

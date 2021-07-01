@@ -7,14 +7,6 @@ public class NoSuchTagException extends ServiceException {
         super(message, errorCode);
     }
 
-    public NoSuchTagException(String message, Throwable cause, String errorCode) {
-        super(message, cause, errorCode);
-    }
-
-    public NoSuchTagException(Throwable cause, String errorCode) {
-        super(cause, errorCode);
-    }
-
     @Override
     public String getErrorCode() {
         return super.getErrorCode();
@@ -25,18 +17,4 @@ public class NoSuchTagException extends ServiceException {
         super.setErrorCode(errorCode);
     }
 
-    public NoSuchTagException() {
-    }
-
-    public NoSuchTagException(String message) {
-        super(message);
-    }
-
-    public NoSuchTagException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public NoSuchTagException(Throwable cause) {
-        super(cause);
-    }
 }
