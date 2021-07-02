@@ -45,6 +45,7 @@ public class GiftController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public GiftDTO updateGift(@RequestBody GiftDTO giftDTO, @PathVariable int id) {
         giftService.updateGiftById(giftDTO, id);
         return giftService.getGiftById(id);

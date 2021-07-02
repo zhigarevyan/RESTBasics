@@ -16,5 +16,5 @@ public class NoSuchUserException extends ServiceException {
     public void setErrorCode(String errorCode) {
         super.setErrorCode(errorCode);
     }
-    
+
 }

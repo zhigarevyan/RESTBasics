@@ -11,8 +11,8 @@ import java.util.List;
 public class OrderEntityToDTOMapper {
     public static OrderDTO toDTO(Order order){
         OrderDTO orderDTO = new OrderDTO();
-        orderDTO.setId(orderDTO.getId());
-        orderDTO.setPrice(orderDTO.getPrice());
+        orderDTO.setId(order.getId());
+        orderDTO.setPrice(order.getPrice());
         orderDTO.setDate(LocalDateTime.ofInstant(order.getDate(), ZoneOffset.UTC));
         orderDTO.setGiftID(order.getGift().getId());
         orderDTO.setUserID(order.getUser().getId());

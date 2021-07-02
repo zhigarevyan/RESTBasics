@@ -3,7 +3,6 @@ package com.epam.esm.service;
 import com.epam.esm.dao.GiftDAO;
 import com.epam.esm.dao.OrderDAO;
 import com.epam.esm.dao.UserDAO;
-import com.epam.esm.dto.GiftDTO;
 import com.epam.esm.dto.OrderDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exeption.impl.InvalidDataException;
@@ -118,26 +117,25 @@ public class OrderService {
         }
         return OrderEntityToDTOMapper.toDTO(orderDAO.getOrdersByUserId(userId));
     }
+
     /**
      * Invokes DAO method to create Order with provided data.
      *
      * @param orderDTO is {@link OrderDTO} object with Order data.
      * @return {@link OrderDTO} object with created data.
      * @throws InvalidDataException if data failed validation
-     * @throws NoSuchGiftException if gift with provided id wasn't found
-     * @throws NoSuchUserException if user with provided id wasn't found
+     * @throws NoSuchGiftException  if gift with provided id wasn't found
+     * @throws NoSuchUserException  if user with provided id wasn't found
      */
-    public OrderDTO createOrder(OrderDTO orderDTO) {
-        if (!Validator.isValidOrderDTO(orderDTO)) {
+    public OrderDTO createOrder(int userId, int giftId) {
+        if (!(Validator.isValidNumber(userId) && Validator.isValidNumber(giftId))) {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION);
         }
-        Integer giftId = orderDTO.getGiftID();
         Optional<Gift> giftById = giftDAO.getGiftById(giftId);
         Gift gift = giftById.orElseThrow(() ->
                 new NoSuchGiftException(
                         String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, giftId),
                         String.format(ERROR_CODE_NO_SUCH_GIFT, giftId)));
-        Integer userId = orderDTO.getUserID();
         Optional<User> userById = userDAO.getUserById(userId);
         User user = userById.orElseThrow(() ->
                 new NoSuchUserException(
@@ -146,7 +144,15 @@ public class OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setGift(gift);
-        order.setPrice(orderDTO.getPrice());
+        order.setPrice(gift.getPrice());
         return OrderEntityToDTOMapper.toDTO(orderDAO.createOrder(order));
+    }
+    /**
+     * Invokes DAO method to get List of all Orders from database.
+     *
+     * @return List of {@link OrderDTO} objects with order data.
+     */
+    public List<OrderDTO> getAllOrders() {
+        return OrderEntityToDTOMapper.toDTO(orderDAO.getAllOrders());
     }
 }

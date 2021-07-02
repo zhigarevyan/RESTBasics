@@ -15,8 +15,9 @@ public class NoSuchOrderException extends ServiceException {
     }
 
 
-    public NoSuchOrderException(String message, Throwable cause) {
-        super(message, cause);
+    public NoSuchOrderException(String message, String errorCode) {
+        super(message, errorCode);
     }
+
 
 }

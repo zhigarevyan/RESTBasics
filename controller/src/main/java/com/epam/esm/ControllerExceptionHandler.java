@@ -1,10 +1,7 @@
 package com.epam.esm;
 
+import com.epam.esm.exeption.impl.*;
 import com.epam.esm.util.ExceptionResponse;
-import com.epam.esm.exeption.impl.DuplicateTagException;
-import com.epam.esm.exeption.impl.InvalidDataException;
-import com.epam.esm.exeption.impl.NoSuchGiftException;
-import com.epam.esm.exeption.impl.NoSuchTagException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -21,6 +18,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String DUPLICATE_TAG = "duplicate_tag";
     private static final String NO_SUCH_TAG = "no_such_tag";
     private static final String NO_SUCH_GIFT = "no_such_gift";
+    private static final String NO_SUCH_ORDER = "no_such_order";
+    private static final String NO_SUCH_USER = "no_such_user";
     private static final String INVALID_DATA = "invalid_data";
     private final MessageSource messageSource;
 
@@ -46,6 +45,20 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NoSuchGiftException.class)
     public ResponseEntity<ExceptionResponse> handleNoSuchTagException(NoSuchGiftException e, Locale locale){
         String message = messageSource.getMessage(NO_SUCH_GIFT, new Object[]{}, locale);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(message, e.getErrorCode());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoSuchOrderException.class)
+    public ResponseEntity<ExceptionResponse> handleNoSuchOrderException(NoSuchOrderException e, Locale locale){
+        String message = messageSource.getMessage(NO_SUCH_GIFT, new Object[]{}, locale);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(message, e.getErrorCode());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoSuchUserException.class)
+    public ResponseEntity<ExceptionResponse> handleNoSuchUserException(NoSuchUserException e, Locale locale){
+        String message = messageSource.getMessage(NO_SUCH_USER, new Object[]{}, locale);
         ExceptionResponse exceptionResponse = new ExceptionResponse(message, e.getErrorCode());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }

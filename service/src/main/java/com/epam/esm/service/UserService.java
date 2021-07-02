@@ -50,7 +50,7 @@ public class UserService {
      * @throws InvalidDataException if data failed validation
      * @return {@link UserDTO} object with User data.
      */
-    UserDTO getUserByID(int userId){
+    public UserDTO getUserById(int userId){
         if(!Validator.isValidNumber(userId)){
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION,ERROR_CODE_INVALID_DATA);
         }
@@ -65,7 +65,7 @@ public class UserService {
      *
      * @return List of {@link UserDTO} objects with tag data.
      */
-    List<UserDTO> getAllUsers(){
+    public List<UserDTO> getAllUsers(){
         return UserEntityToDTOMapper.toDTO(userDAO.getAllUsers());
     }
 }
