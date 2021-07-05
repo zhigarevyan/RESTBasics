@@ -4,6 +4,7 @@ import com.epam.esm.dao.UserDAO;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.exeption.impl.InvalidDataException;
 import com.epam.esm.exeption.impl.NoSuchUserException;
+import com.epam.esm.util.Page;
 import com.epam.esm.util.UserEntityToDTOMapper;
 import com.epam.esm.util.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class UserService {
      * An object of {@link UserDAO}
      */
     private final UserDAO userDAO;
+
     /**
      * Public constructor that receives tagDAO
      *
@@ -42,30 +44,32 @@ public class UserService {
     public UserService(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
+
     /**
      * Invokes DAO method to get User with provided id.
      *
      * @param userId is id of tag to be deleted.
-     * @throws NoSuchUserException   if no User with provided name founded
-     * @throws InvalidDataException if data failed validation
      * @return {@link UserDTO} object with User data.
+     * @throws NoSuchUserException  if no User with provided name founded
+     * @throws InvalidDataException if data failed validation
      */
-    public UserDTO getUserById(int userId){
-        if(!Validator.isValidNumber(userId)){
-            throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION,ERROR_CODE_INVALID_DATA);
+    public UserDTO getUserById(int userId) {
+        if (!Validator.isValidNumber(userId)) {
+            throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
         }
-        if(userDAO.getUserById(userId).isEmpty()){
-            throw new NoSuchUserException(String.format(MESSAGE_NO_SUCH_USER_EXCEPTION,userId),
-                    String.format(ERROR_CODE_NO_SUCH_USER_EXCEPTION,userId));
+        if (userDAO.getUserById(userId).isEmpty()) {
+            throw new NoSuchUserException(String.format(MESSAGE_NO_SUCH_USER_EXCEPTION, userId),
+                    String.format(ERROR_CODE_NO_SUCH_USER_EXCEPTION, userId));
         }
         return UserEntityToDTOMapper.toDTO(userDAO.getUserById(userId).get());
     }
+
     /**
      * Invokes DAO method to get List of all Users from database.
      *
      * @return List of {@link UserDTO} objects with tag data.
      */
-    public List<UserDTO> getAllUsers(){
-        return UserEntityToDTOMapper.toDTO(userDAO.getAllUsers());
+    public List<UserDTO> getAllUsers(Page page) {
+        return UserEntityToDTOMapper.toDTO(userDAO.getAllUsers(page.getPage(), page.getSize()));
     }
 }

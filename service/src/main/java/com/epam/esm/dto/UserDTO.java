@@ -3,10 +3,13 @@ package com.epam.esm.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 public class UserDTO {
 
-    Integer id;
-    String name;
+    private Integer id;
+    private String name;
+    private List<UserOrderDTO> orderList;
 }

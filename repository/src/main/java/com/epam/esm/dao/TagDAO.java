@@ -52,8 +52,16 @@ public interface TagDAO {
 
     /**
      * Connects to database and returns all Tags.
-     *
+     * @param page is page number
+     * @param size is page size
      * @return List of all {@link Tag} entities from database.
      */
-    List<Tag> getAllTags();
+    List<Tag> getAllTags(int page, int size);
+
+    /**
+     * Connects to database and returns most widely used Tag.
+     *
+     * @return {@link Tag} entity from database.
+     */
+    Tag getMostWidelyUsedTagFromUser(int userId);
 }

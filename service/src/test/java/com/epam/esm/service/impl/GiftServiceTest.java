@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.GiftDAO;
+import com.epam.esm.dao.OrderDAO;
 import com.epam.esm.dao.TagDAO;
 import com.epam.esm.dto.GiftDTO;
 import com.epam.esm.exeption.impl.InvalidDataException;
@@ -8,8 +9,7 @@ import com.epam.esm.exeption.impl.NoSuchGiftException;
 import com.epam.esm.model.Gift;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.GiftService;
-import com.epam.esm.util.GiftSQLQueryParameters;
-import com.epam.esm.util.GiftSqlBuilder;
+import com.epam.esm.util.GiftQueryParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +50,8 @@ class GiftServiceTest {
     private GiftDAO giftDAO;
     @Mock
     private TagDAO tagDAO;
+    @Mock
+    private OrderDAO orderDAO;
     @InjectMocks
     private GiftService giftService;
 
@@ -88,7 +90,7 @@ class GiftServiceTest {
         tag.setName(TEST_NAME_1);
 
 
-        giftService = new GiftService(giftDAO,tagDAO);
+        giftService = new GiftService(giftDAO,tagDAO,orderDAO);
     }
 
     @Test
@@ -115,7 +117,6 @@ class GiftServiceTest {
         giftService.deleteGiftById(TEST_ID_1);
 
         verify(giftDAO,times(1)).deleteGiftById(TEST_ID_1);
-        verify(giftDAO,times(1)).deleteGiftTagByGiftId(TEST_ID_1);
 
     }
     @Test
@@ -160,9 +161,9 @@ class GiftServiceTest {
     @Test
     void getGiftsByParams() {
         given(giftDAO.getGiftsByParams(any())).willReturn(giftList);
-        GiftSQLQueryParameters giftSQLQueryParameters = new GiftSQLQueryParameters();
-        List<GiftDTO> giftsByParams = giftService.getGiftsByParams(giftSQLQueryParameters);
-        verify(giftDAO).getGiftsByParams(GiftSqlBuilder.getGetWithParamsSQL(giftSQLQueryParameters));
+        GiftQueryParameters giftQueryParameters = new GiftQueryParameters();
+        List<GiftDTO> giftsByParams = giftService.getGiftsByParams(giftQueryParameters);
+        verify(giftDAO).getGiftsByParams(GiftSqlBuilder.getGetWithParamsSQL(giftQueryParameters));
 
         assertIterableEquals(giftDTOList,giftsByParams);
     }

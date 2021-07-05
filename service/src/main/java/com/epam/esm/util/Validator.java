@@ -48,4 +48,16 @@ public class Validator {
                 isValidNumber(orderDTO.getUserID());
 
     }
+
+    public static boolean isValidCreateOrderParameter(CreateOrderParameter parameter) {
+        for(Integer id : parameter.getGifts()){
+            if(!isValidNumber(id)){
+                return false;
+            }
+        }
+        if(isValidNumber(parameter.getUser())){
+            return false;
+        }
+        return true;
+    }
 }

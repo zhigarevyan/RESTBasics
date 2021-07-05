@@ -2,6 +2,12 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.GiftDAO;
 import com.epam.esm.model.Gift;
+import com.epam.esm.model.Order;
+import com.epam.esm.model.Order_;
+import com.epam.esm.util.GetGiftQueryHandler;
+import com.epam.esm.util.GiftFieldUpdater;
+import com.epam.esm.util.GiftQueryParameters;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 
@@ -10,8 +16,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -25,7 +33,15 @@ import java.util.Optional;
 public class GiftDAOImpl implements GiftDAO {
     @PersistenceContext
     EntityManager entityManager;
+    /**
+     * An object of {@link GetGiftQueryHandler}
+     */
+    GetGiftQueryHandler handler;
 
+    @Autowired
+    public GiftDAOImpl(GetGiftQueryHandler handler) {
+        this.handler = handler;
+    }
 
     @Override
     public Gift createGift(Gift gift) {
@@ -46,11 +62,15 @@ public class GiftDAOImpl implements GiftDAO {
     }
 
     @Override
-    public void updateGiftById(String updateSQL, int id) {
-        final String GIFT_ID_PARAMETER = "giftId";
-        Query query = entityManager.createNativeQuery(updateSQL);
-        query.setParameter(GIFT_ID_PARAMETER, id);
-        query.executeUpdate();
+    public Gift updateGiftById(Gift gift, int id) {
+        Gift oldGift = entityManager.find(Gift.class, id);
+        GiftFieldUpdater.update(oldGift, gift);
+
+        LocalDateTime currentLocalDateTime = LocalDateTime.now();
+        oldGift.setLastUpdateDate(currentLocalDateTime.toInstant(ZoneOffset.UTC));
+
+        entityManager.merge(oldGift);
+        return oldGift;
     }
 
     @Override
@@ -60,39 +80,35 @@ public class GiftDAOImpl implements GiftDAO {
     }
 
     @Override
-    public List<Gift> getGifts() {
+    public List<Gift> getGifts(int page, int size) {
+        final int PAGE_OFFSET = 1;
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Gift> query = criteriaBuilder.createQuery(Gift.class);
         Root<Gift> root = query.from(Gift.class);
         query.select(root);
-        return entityManager.createQuery(query).getResultList();
+        int itemsOffset = (page - PAGE_OFFSET) * size;
+        return entityManager.createQuery(query).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
     }
 
     @Override
-    public List<Gift> getGiftsByParams(String getSql) {
-        Query query = entityManager.createQuery(getSql, Gift.class);
-        return query.getResultList();
+    public List<Gift> getGiftsByParams(GiftQueryParameters parameters) {
+        return handler.handle(entityManager, parameters);
     }
 
     @Override
-    public void createGiftTag(int giftId, int tagId) {
-        final String QUERY_CREATE_GIFT_TAG = "createGiftTag";
-        final String GIFT_ID_PARAMETER = "giftId";
-        final String TAG_ID_PARAMETER = "tagId";
-        Query namedQuery = entityManager.createNamedQuery(QUERY_CREATE_GIFT_TAG);
-        namedQuery.setParameter(GIFT_ID_PARAMETER, giftId);
-        namedQuery.setParameter(TAG_ID_PARAMETER, tagId);
-        namedQuery.executeUpdate();
+    public List<Gift> getGiftCertificateListByOrderID(int id) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Gift> giftCertificateQuery = criteriaBuilder.createQuery(Gift.class);
+
+        Root<Order> giftRoot = giftCertificateQuery.from(Order.class);
+        ListJoin<Order, Gift> giftCertificateList = giftRoot.joinList(Order_.GIFT_LIST);
+        giftCertificateQuery
+                .select(giftCertificateList)
+                .where(criteriaBuilder.equal(giftRoot.get(Order_.ID), id));
+
+        return entityManager.createQuery(giftCertificateQuery).getResultList();
     }
 
-    @Override
-    public void deleteGiftTagByGiftId(int id) {
-        final String QUERY_DELETE_GIFT_TAG = "deleteGiftTagByGiftId";
-        final String GIFT_ID_PARAMETER = "giftId";
-        Query namedQuery = entityManager.createNamedQuery(QUERY_DELETE_GIFT_TAG);
-        namedQuery.setParameter(GIFT_ID_PARAMETER, id);
-        namedQuery.executeUpdate();
 
-    }
 }
 

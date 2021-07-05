@@ -1,16 +1,14 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDAO;
-import com.epam.esm.model.Tag;
-import com.epam.esm.model.Tag_;
+import com.epam.esm.model.*;
+import com.epam.esm.model.Order;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
@@ -85,12 +83,16 @@ public class TagDAOImpl implements TagDAO {
      */
     @Override
     public List<Tag> getTagListByGiftId(int giftId) {
-        final String GET_TAG_LIST_BY_GIFT_ID_QUERY = "getTagListByGiftId";
-        final String GIFT_ID_PARAMETER = "giftId";
-        Query namedQuery = entityManager.createNamedQuery(GET_TAG_LIST_BY_GIFT_ID_QUERY);
-        namedQuery.setParameter(GIFT_ID_PARAMETER, giftId);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> tagQuery = criteriaBuilder.createQuery(Tag.class);
 
-        return namedQuery.getResultList();
+        Root<Gift> giftRoot = tagQuery.from(Gift.class);
+        ListJoin<Gift, Tag> tagList = giftRoot.joinList(Gift_.TAG_LIST);
+        tagQuery
+                .select(tagList)
+                .where(criteriaBuilder.equal(giftRoot.get(Gift_.ID), giftId));
+
+        return entityManager.createQuery(tagQuery).getResultList();
     }
 
     /**
@@ -99,12 +101,34 @@ public class TagDAOImpl implements TagDAO {
      * @return List of all {@link Tag} entities from database.
      */
     @Override
-    public List<Tag> getAllTags() {
+    public List<Tag> getAllTags(int page, int size) {
+        final int PAGE_OFFSET = 1;
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tag> query = criteriaBuilder.createQuery(Tag.class);
         Root<Tag> root = query.from(Tag.class);
         query.select(root);
-        return entityManager.createQuery(query).getResultList();
+        int itemsOffset = (page - PAGE_OFFSET) * size;
+        return entityManager.createQuery(query).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
+    }
+
+    @Override
+    public Tag getMostWidelyUsedTagFromUser(int userId) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> tagQuery = criteriaBuilder.createQuery(Tag.class);
+
+        Root<User> userRoot = tagQuery.from(User.class);
+        ListJoin<User, Order> orderList = userRoot.joinList(User_.ORDER_LIST);
+        ListJoin<Order, Gift> giftList = orderList.joinList(Order_.GIFT_LIST);
+        ListJoin<Gift, Tag> tagList = giftList.joinList(Gift_.TAG_LIST);
+
+        Expression orderID = tagList.get(Order_.ID);
+        tagQuery
+                .select(tagList)
+                .where(criteriaBuilder.equal(userRoot.get(User_.ID), userId))
+                .groupBy(orderID)
+                .orderBy(criteriaBuilder.desc(criteriaBuilder.count(orderID)));
+
+        return entityManager.createQuery(tagQuery).setMaxResults(1).getSingleResult();
     }
 
 }

@@ -4,7 +4,7 @@ import com.epam.esm.dto.GiftDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.service.GiftService;
 import com.epam.esm.service.TagService;
-import com.epam.esm.util.GiftSQLQueryParameters;
+import com.epam.esm.util.GiftQueryParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -40,15 +40,14 @@ public class GiftController {
     }
 
     @GetMapping("/byParams")
-    public List<GiftDTO> getGiftsByParams(@RequestBody GiftSQLQueryParameters params) {
+    public List<GiftDTO> getGiftsByParams(@RequestBody GiftQueryParameters params) {
         return giftService.getGiftsByParams(params);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public GiftDTO updateGift(@RequestBody GiftDTO giftDTO, @PathVariable int id) {
-        giftService.updateGiftById(giftDTO, id);
-        return giftService.getGiftById(id);
+        return giftService.updateGiftById(giftDTO, id);
     }
 
     @DeleteMapping("/{id}")

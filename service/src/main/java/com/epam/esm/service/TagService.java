@@ -2,12 +2,15 @@ package com.epam.esm.service;
 
 import com.epam.esm.dao.GiftDAO;
 import com.epam.esm.dao.TagDAO;
+import com.epam.esm.dao.UserDAO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exeption.impl.DuplicateTagException;
 import com.epam.esm.exeption.impl.InvalidDataException;
 import com.epam.esm.exeption.impl.NoSuchGiftException;
 import com.epam.esm.exeption.impl.NoSuchTagException;
 import com.epam.esm.model.Tag;
+import com.epam.esm.model.User;
+import com.epam.esm.util.Page;
 import com.epam.esm.util.TagEntityDTOMapper;
 import com.epam.esm.util.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,14 +76,20 @@ public class TagService {
      */
     private final GiftDAO giftDAO;
     /**
+     * An object of {@link UserDAO}
+     */
+    private final UserDAO userDAO;
+
+    /**
      * Public constructor that receives tagDAO
      *
      * @param tagDAO is {@link TagDAO} interface providing DAO methods.
      */
     @Autowired
-    public TagService(TagDAO tagDAO, GiftDAO giftDAO) {
+    public TagService(TagDAO tagDAO, GiftDAO giftDAO, UserDAO userDAO) {
         this.tagDAO = tagDAO;
         this.giftDAO = giftDAO;
+        this.userDAO = userDAO;
     }
 
     /**
@@ -112,12 +121,12 @@ public class TagService {
      */
     @Transactional
     public void deleteTagById(int id) {
+        if (!Validator.isValidNumber(id)) {
+            throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
+        }
         if (tagDAO.getTagById(id).isEmpty()) {
             throw new NoSuchTagException(String.format(MESSAGE_NO_SUCH_TAG_WITH_ID_EXCEPTION, id),
                     String.format(ERROR_CODE_NO_SUCH_TAG_BY_ID, id));
-        }
-        if (!Validator.isValidNumber(id)) {
-            throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
         }
         tagDAO.deleteTagById(id);
     }
@@ -167,16 +176,16 @@ public class TagService {
      *
      * @param giftId is id of GiftCertificate.
      * @return List of {@link TagDTO} objects with tag data.
-     * @throws NoSuchGiftException   if no Gift with provided id founded
+     * @throws NoSuchGiftException  if no Gift with provided id founded
      * @throws InvalidDataException if data failed validation
      */
     public List<TagDTO> getTagListByGiftId(int giftId) {
         if (!Validator.isValidNumber(giftId)) {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
         }
-        if(giftDAO.getGiftById(giftId).isEmpty()){
-            throw new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION,giftId),
-                    String.format(ERROR_CODE_NO_SUCH_GIFT,giftId));
+        if (giftDAO.getGiftById(giftId).isEmpty()) {
+            throw new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, giftId),
+                    String.format(ERROR_CODE_NO_SUCH_GIFT, giftId));
         }
         return TagEntityDTOMapper.toDTO(tagDAO.getTagListByGiftId(giftId));
     }
@@ -186,7 +195,20 @@ public class TagService {
      *
      * @return List of {@link TagDTO} objects with tag data.
      */
-    public List<TagDTO> getAllTags() {
-        return TagEntityDTOMapper.toDTO(tagDAO.getAllTags());
+    public List<TagDTO> getAllTags(Page page) {
+        return TagEntityDTOMapper.toDTO(tagDAO.getAllTags(page.getPage(), page.getSize()));
+    }
+
+    /**
+     * Invokes Dao method to get the most widely used tag of a user with the highest cost of all orders
+     *
+     * @return {@link TagDTO} object with tag data.
+     */
+    public TagDTO getMostWidelyUsedTagFromUserWithHighestCostOfAllOrders() {
+        User user = userDAO.getUserWithHighestCostOfAllOrders();
+
+        Tag tag = tagDAO.getMostWidelyUsedTagFromUser(user.getId());
+
+        return TagEntityDTOMapper.toDTO(tag);
     }
 }

@@ -53,12 +53,14 @@ public class OrderDAOImpl implements OrderDAO {
      * @return List of all {@link Order} entities from database.
      */
     @Override
-    public List<Order> getAllOrders() {
+    public List<Order> getAllOrders(int page, int size) {
+        final int PAGE_OFFSET = 1;
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Order> query = criteriaBuilder.createQuery(Order.class);
         Root<Order> root = query.from(Order.class);
         query.select(root);
-        return entityManager.createQuery(query).getResultList();
+        int itemsOffset = (page - PAGE_OFFSET) * size;
+        return entityManager.createQuery(query).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
     }
     /**
      * Connects to database and add an new Order.

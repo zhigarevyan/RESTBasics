@@ -1,7 +1,7 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.model.Gift;
-import com.epam.esm.util.GiftSQLQueryParameters;
+import com.epam.esm.util.GiftQueryParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,11 +29,11 @@ public interface GiftDAO {
     /**
      * Connects to database and updates Gift.
      *
-     * @param updateSQL String object containing SQL string and params for request
+     * @param gift {@link Gift} new gift object.
      * @param id        is Gift ID value.
      * @return updated {@link Gift} entity
      */
-    void updateGiftById(String updateSQL, int id);
+    Gift updateGiftById(Gift gift, int id);
 
     /**
      * Connects to database and returns Gift by ID.
@@ -45,10 +45,11 @@ public interface GiftDAO {
 
     /**
      * Connects to database and returns all Gifts.
-     *
+     * @param page is page number
+     * @param size is page size
      * @return List of all {@link Gift} entities from database.
      */
-    List<Gift> getGifts();
+    List<Gift> getGifts(int page, int size);
 
     /**
      * Connects to database and returns list of matching Gifts
@@ -56,22 +57,14 @@ public interface GiftDAO {
      * @param getSql String object containing SQL string and params for request
      * @return List of matched {@link Gift} entities from database.
      */
-    List<Gift> getGiftsByParams(String getSql);
+    List<Gift> getGiftsByParams(GiftQueryParameters parameters);
 
     /**
-     * Connects to database and make record to gift_tag table that Gift with provided giftID have tag with provided
-     * tagID
+     * Connects to database and returns list of Gifts linked to Order in order_gift table
      *
-     * @param giftId is Gift ID value.
-     * @param tagId  is Tag ID value.
+     * @param id is Order id
+     * @return List of matched {@link Gift} entities from database.
      */
-    void createGiftTag(int giftId, int tagId);
-
-    /**
-     * Connects to database and delete records from gift_tag table with provided gift ID
-     *
-     * @param id is Gift ID value.
-     */
-    void deleteGiftTagByGiftId(int id);
+    public List<Gift> getGiftCertificateListByOrderID(int id);
 
 }

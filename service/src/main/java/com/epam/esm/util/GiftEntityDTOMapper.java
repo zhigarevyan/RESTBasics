@@ -2,6 +2,7 @@ package com.epam.esm.util;
 
 import com.epam.esm.dto.GiftDTO;
 import com.epam.esm.model.Gift;
+import com.epam.esm.model.Tag;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -27,6 +28,14 @@ public class GiftEntityDTOMapper {
         giftDTO.setPrice(gift.getPrice());
         giftDTO.setCreateDate(LocalDateTime.ofInstant(gift.getCreateDate(), ZoneOffset.UTC));
         giftDTO.setLastUpdateDate(LocalDateTime.ofInstant(gift.getLastUpdateDate(), ZoneOffset.UTC));
+        List<Tag> tagList = gift.getTagList();
+        if (tagList != null) {
+            List<String> tagNamesList = new ArrayList<>();
+
+            tagList.forEach(tag -> tagNamesList.add(tag.getName()));
+            giftDTO.setTagList(tagNamesList);
+        }
+
 
         return giftDTO;
     }
@@ -68,4 +77,5 @@ public class GiftEntityDTOMapper {
         gifts.forEach(gift -> dtoList.add(toDTO(gift)));
         return dtoList;
     }
+
 }

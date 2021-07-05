@@ -12,11 +12,15 @@ import com.epam.esm.exeption.impl.NoSuchUserException;
 import com.epam.esm.model.Gift;
 import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
+import com.epam.esm.util.CreateOrderParameter;
 import com.epam.esm.util.OrderEntityToDTOMapper;
+import com.epam.esm.util.Page;
 import com.epam.esm.util.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.Min;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -121,21 +125,30 @@ public class OrderService {
     /**
      * Invokes DAO method to create Order with provided data.
      *
-     * @param orderDTO is {@link OrderDTO} object with Order data.
+     * @param parameter is {@link CreateOrderParameter} object with Order data.
      * @return {@link OrderDTO} object with created data.
      * @throws InvalidDataException if data failed validation
      * @throws NoSuchGiftException  if gift with provided id wasn't found
      * @throws NoSuchUserException  if user with provided id wasn't found
      */
-    public OrderDTO createOrder(int userId, int giftId) {
-        if (!(Validator.isValidNumber(userId) && Validator.isValidNumber(giftId))) {
+    public OrderDTO createOrder(CreateOrderParameter parameter) {
+        int orderPrice = 0;
+        List<Gift> giftList = new ArrayList<>();
+        Integer userId = parameter.getUser();
+        List<Integer> giftIds = parameter.getGifts();
+
+        if (!Validator.isValidCreateOrderParameter(parameter)) {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION);
         }
-        Optional<Gift> giftById = giftDAO.getGiftById(giftId);
-        Gift gift = giftById.orElseThrow(() ->
-                new NoSuchGiftException(
-                        String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, giftId),
-                        String.format(ERROR_CODE_NO_SUCH_GIFT, giftId)));
+        for (Integer giftId : giftIds) {
+            Optional<Gift> giftById = giftDAO.getGiftById(giftId);
+            Gift gift = giftById.orElseThrow(() ->
+                    new NoSuchGiftException(
+                            String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, giftId),
+                            String.format(ERROR_CODE_NO_SUCH_GIFT, giftId)));
+            orderPrice+=gift.getPrice();
+            giftList.add(gift);
+        }
         Optional<User> userById = userDAO.getUserById(userId);
         User user = userById.orElseThrow(() ->
                 new NoSuchUserException(
@@ -143,16 +156,17 @@ public class OrderService {
                         String.format(ERROR_CODE_NO_SUCH_USER_EXCEPTION, userId)));
         Order order = new Order();
         order.setUser(user);
-        order.setGift(gift);
-        order.setPrice(gift.getPrice());
+        order.setGiftList(giftList);
+        order.setPrice(orderPrice);
         return OrderEntityToDTOMapper.toDTO(orderDAO.createOrder(order));
     }
+
     /**
      * Invokes DAO method to get List of all Orders from database.
      *
      * @return List of {@link OrderDTO} objects with order data.
      */
-    public List<OrderDTO> getAllOrders() {
-        return OrderEntityToDTOMapper.toDTO(orderDAO.getAllOrders());
+    public List<OrderDTO> getAllOrders(Page page) {
+        return OrderEntityToDTOMapper.toDTO(orderDAO.getAllOrders(page.getPage(),page.getSize()));
     }
 }

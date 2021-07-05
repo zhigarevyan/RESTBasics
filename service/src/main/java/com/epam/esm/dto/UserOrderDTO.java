@@ -9,10 +9,8 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class OrderDTO {
-
+public class UserOrderDTO {
     private Integer id;
-    private UserInOrderDTO user;
     private List<GiftDTO> gifts;
     private Integer price;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")

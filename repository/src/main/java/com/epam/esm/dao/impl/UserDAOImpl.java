@@ -11,6 +11,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
+
 @Repository
 public class UserDAOImpl implements UserDAO {
     /**
@@ -30,17 +31,29 @@ public class UserDAOImpl implements UserDAO {
         return Optional.ofNullable(entityManager.find(User.class, id));
     }
 
+
+    @Override
+    public User getUserWithHighestCostOfAllOrders() {
+        final String SELECT_USER_WITH_HIGHEST_COST_OF_ALL_ORDERS_JPQL =
+                "SELECT orders.user FROM Order orders " +
+                        "GROUP BY orders.user ORDER BY SUM(orders.price) DESC";
+        return (User) entityManager.createQuery(SELECT_USER_WITH_HIGHEST_COST_OF_ALL_ORDERS_JPQL)
+                .setMaxResults(1).getSingleResult();
+    }
+
     /**
      * Connects to database and returns all Users.
      *
      * @return List of all {@link User} entities from database.
      */
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(int page, int size) {
+        final int PAGE_OFFSET = 1;
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> query = criteriaBuilder.createQuery(User.class);
         Root<User> root = query.from(User.class);
         query.select(root);
-        return entityManager.createQuery(query).getResultList();
+        int itemsOffset = (page - PAGE_OFFSET) * size;
+        return entityManager.createQuery(query).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
     }
 }

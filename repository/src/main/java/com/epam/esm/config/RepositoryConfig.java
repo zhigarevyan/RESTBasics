@@ -1,11 +1,7 @@
 package com.epam.esm.config;
 
-import com.epam.esm.util.GiftMapper;
-import com.epam.esm.util.TagMapper;
 import org.springframework.context.annotation.*;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -14,8 +10,6 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
 
@@ -74,40 +68,5 @@ public class RepositoryConfig {
 
         return hibernateProperties;
     }
-/*    @Bean
-    @Scope("Prototype")
-    public EntityManager entityManager(EntityManagerFactory entityManagerFactory){
-        return entityManagerFactory.createEntityManager();
-    }*/
 
-    /*@Profile("prod")
-    @Bean(name = "dataSource")
-    public DataSource mysqlDataSource(){
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/gift_db");
-        dataSource.setUsername("root");
-        dataSource.setPassword("root");
-        return dataSource;
-    }
-    @Profile("dev")
-    @Bean(name = "dataSource")
-    public DataSource postgreDataSource(){
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://localhost:3306/gift_db");
-        dataSource.setUsername("root");
-        dataSource.setPassword("root");
-        return dataSource;
-    }
-
-    @Bean(name = "tagMapper")
-    public TagMapper tagMapper(){
-        return new TagMapper();
-    }*/
-
-/*    @Bean(name = "giftMapper")
-    public GiftMapper giftMapper(){
-        return new GiftMapper();
-    }*/
 }

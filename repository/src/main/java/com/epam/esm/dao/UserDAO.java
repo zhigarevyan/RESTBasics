@@ -17,10 +17,19 @@ public interface UserDAO {
      * @return Optional of {@link User} entity from database.
      */
     Optional<User> getUserById(int id);
+
     /**
      * Connects to database and returns all Users.
-     *
+     * @param page is page number
+     * @param size is page size
      * @return List of all {@link User} entities from database.
      */
-    List<User> getAllUsers();
+    List<User> getAllUsers(int page,int size);
+
+    /**
+     * Connects to database and returns user with highest cost of all orders
+     *
+     * @return {@link User} entity from database.
+     */
+    User getUserWithHighestCostOfAllOrders();
 }

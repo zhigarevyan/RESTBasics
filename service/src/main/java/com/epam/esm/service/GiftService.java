@@ -1,15 +1,17 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dao.GiftDAO;
+import com.epam.esm.dao.OrderDAO;
 import com.epam.esm.dao.TagDAO;
 import com.epam.esm.dto.GiftDTO;
 import com.epam.esm.exeption.impl.InvalidDataException;
 import com.epam.esm.exeption.impl.NoSuchGiftException;
+import com.epam.esm.exeption.impl.NoSuchOrderException;
 import com.epam.esm.model.Gift;
 import com.epam.esm.model.Tag;
 import com.epam.esm.util.GiftEntityDTOMapper;
-import com.epam.esm.util.GiftSQLQueryParameters;
-import com.epam.esm.util.GiftSqlBuilder;
+import com.epam.esm.util.GiftQueryParameters;
+import com.epam.esm.util.Page;
 import com.epam.esm.util.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.epam.esm.util.GiftEntityDTOMapper.toDTO;
 
 /**
  * Implementation of {@link GiftService}. Interface provides methods to interact with GiftDAO.
@@ -34,6 +38,10 @@ public class GiftService {
      */
     private static final String MESSAGE_NO_SUCH_GIFT_EXCEPTION = "No such gift with id - %d exception";
     /**
+     * Error message when Gift wasn't found by id
+     */
+    private static final String MESSAGE_NO_SUCH_ORDER_EXCEPTION = "No such order with id - %d exception";
+    /**
      * Error code when data failed validation
      */
     private static final String ERROR_CODE_INVALID_DATA = "0101";
@@ -42,6 +50,10 @@ public class GiftService {
      */
     private static final String ERROR_CODE_NO_SUCH_GIFT = "0102404_%d";
     /**
+     * Error code when Gift wasn't found by id
+     */
+    private static final String ERROR_CODE_NO_SUCH_ORDER = "0402404_%d";
+    /**
      * An object of {@link GiftDAO}
      */
     private final GiftDAO giftDAO;
@@ -49,6 +61,10 @@ public class GiftService {
      * An object of {@link TagDAO}
      */
     private final TagDAO tagDAO;
+    /**
+     * An object of {@link OrderDAO}
+     */
+    private final OrderDAO orderDAO;
 
     /**
      * Public constructor that receives giftDAO and tagDAO
@@ -57,9 +73,10 @@ public class GiftService {
      * @param tagDAO  is {@link TagDAO} interface providing DAO methods.
      */
     @Autowired
-    public GiftService(GiftDAO giftDAO, TagDAO tagDAO) {
+    public GiftService(GiftDAO giftDAO, TagDAO tagDAO, OrderDAO orderDAO) {
         this.giftDAO = giftDAO;
         this.tagDAO = tagDAO;
+        this.orderDAO = orderDAO;
     }
 
     /**
@@ -75,9 +92,11 @@ public class GiftService {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION,
                     ERROR_CODE_INVALID_DATA);
         }
-        Gift createdGift = giftDAO.createGift(GiftEntityDTOMapper.toEntity(gift));
-        insertTagsIfNotExists(createdGift.getId(), gift.getTagList());
-        return setTagsAndConvertToDTO(createdGift);
+        List<Tag> tagList = createTagsIfNotFoundAndReturnAll(gift.getTagList());
+        Gift entity = GiftEntityDTOMapper.toEntity(gift);
+        entity.setTagList(tagList);
+        Gift createdGift = giftDAO.createGift(entity);
+        return toDTO(createdGift);
     }
 
     /**
@@ -93,7 +112,6 @@ public class GiftService {
                     String.format(ERROR_CODE_NO_SUCH_GIFT, id));
         }
         giftDAO.deleteGiftById(id);
-        giftDAO.deleteGiftTagByGiftId(id);
     }
 
     /**
@@ -104,15 +122,15 @@ public class GiftService {
      * @throws NoSuchGiftException if no Gift with provided id founded
      */
     @Transactional
-    public void updateGiftById(GiftDTO giftDTO, int id) {
+    public GiftDTO updateGiftById(GiftDTO giftDTO, int id) {
         if (giftDAO.getGiftById(id).isEmpty()) {
             throw new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, id),
                     String.format(ERROR_CODE_NO_SUCH_GIFT, id));
         }
-        String updateSql = GiftSqlBuilder.getUpdateSql(GiftEntityDTOMapper.toEntity(giftDTO));
-        giftDAO.updateGiftById(updateSql, id);
-        giftDAO.deleteGiftTagByGiftId(id);
-        insertTagsIfNotExists(id, giftDTO.getTagList());
+        List<Tag> tagList = createTagsIfNotFoundAndReturnAll(giftDTO.getTagList());
+        Gift entity = GiftEntityDTOMapper.toEntity(giftDTO);
+        entity.setTagList(tagList);
+        return toDTO(giftDAO.updateGiftById(entity, id));
     }
 
     /**
@@ -129,7 +147,8 @@ public class GiftService {
             throw new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, id),
                     String.format(ERROR_CODE_NO_SUCH_GIFT, id));
         }
-        return setTagsAndConvertToDTO(giftById.get());
+
+        return toDTO(giftById.get());
     }
 
     /**
@@ -137,74 +156,51 @@ public class GiftService {
      *
      * @return List of {@link GiftDTO} objects with Gift data.
      */
-    public List<GiftDTO> getGifts() {
-        List<Gift> gifts = giftDAO.getGifts();
-        List<GiftDTO> giftDTOList = new ArrayList<>();
-        for (Gift gift : gifts) {
-            giftDTOList.add(setTagsAndConvertToDTO(gift));
-        }
-        return giftDTOList;
+    public List<GiftDTO> getGifts(Page page) {
+        List<Gift> gifts = giftDAO.getGifts(page.getPage(), page.getSize());
+        return toDTO(gifts);
     }
 
     /**
      * Invokes DAO method to get List of all Gifts that matches parameters
      *
-     * @param params is {@link GiftSQLQueryParameters} object with requested parameters
+     * @param params is {@link GiftQueryParameters} object with requested parameters
      * @return List of {@link GiftDTO} objects with Gift data.
      */
-    public List<GiftDTO> getGiftsByParams(GiftSQLQueryParameters params) {
-        List<GiftDTO> giftDTOList = new ArrayList<>();
-        String getWithParamsSQL = GiftSqlBuilder.getGetWithParamsSQL(params);
-        List<Gift> giftsByParams = giftDAO.getGiftsByParams(getWithParamsSQL);
-        for (Gift giftsByParam : giftsByParams) {
-            giftDTOList.add(setTagsAndConvertToDTO(giftsByParam));
+    public List<GiftDTO> getGiftsByParams(GiftQueryParameters params) {
+        if (params.isEmpty()) {
+            return getGifts(params.getPage());
         }
-        return giftDTOList;
+        List<Gift> giftList = giftDAO.getGiftsByParams(params);
+
+        return toDTO(giftList);
     }
 
-    /**
-     * Invokes DAO method to create GiftTag
-     *
-     * @param giftId is id of gift
-     * @param tagId  is id of tag
-     */
-    @Transactional
-    public void createGiftTag(int giftId, int tagId) {
-        Optional<Gift> giftById = giftDAO.getGiftById(giftId);
-        Optional<Tag> tagById = tagDAO.getTagById(tagId);
-        if (tagById.isPresent() && giftById.isPresent()) {
-            giftDAO.createGiftTag(giftId, tagId);
+    public List<GiftDTO> getCertificateListByOrderID(int id) {
+        if (orderDAO.getOrderById(id).isEmpty()) {
+            throw new NoSuchOrderException(
+                    String.format(MESSAGE_NO_SUCH_ORDER_EXCEPTION, id),
+                    String.format(ERROR_CODE_NO_SUCH_ORDER, id));
         }
+        List<Gift> giftList = giftDAO.getGiftCertificateListByOrderID(id);
+
+        return toDTO(giftList);
     }
 
-    /**
-     * Invokes DAO method to delete GiftTag
-     *
-     * @param giftId is id of gift
-     */
-    @Transactional
-    public void deleteGiftTagByGiftId(int giftId) {
-        Optional<Gift> giftById = giftDAO.getGiftById(giftId);
-        if (giftById.isPresent()) {
-            giftDAO.deleteGiftTagByGiftId(giftId);
+
+    private List<Tag> createTagsIfNotFoundAndReturnAll(List<String> tagNamesList) {
+        if (tagNamesList == null) {
+            return new ArrayList<>();
         }
-    }
+        List<Tag> tagList = new ArrayList<>();
 
-    private GiftDTO setTagsAndConvertToDTO(Gift gift) {
-        List<Tag> tagListByGiftId = tagDAO.getTagListByGiftId(gift.getId());
-        GiftDTO giftDTO = GiftEntityDTOMapper.toDTO(gift);
-        giftDTO.setTagListWithTags(tagListByGiftId);
-        return giftDTO;
-    }
+        tagNamesList.forEach(tagName -> {
+            Optional<Tag> optionalTag = tagDAO.getTagByName(tagName);
 
-    private void insertTagsIfNotExists(int giftID, List<String> tagList) {
-        if (tagList != null) {
-            tagList.forEach(tagName -> {
-                Optional<Tag> optionalTag = tagDAO.getTagByName(tagName);
-                Tag tag = optionalTag.orElseGet(() -> tagDAO.createTag(tagName));
+            Tag tag = optionalTag.orElseGet(() -> tagDAO.createTag(tagName));
+            tagList.add(tag);
+        });
 
-                giftDAO.createGiftTag(giftID, tag.getId());
-            });
-        }
+        return tagList;
     }
 }

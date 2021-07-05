@@ -1,34 +1,34 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.model.Tag;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class GiftDTO {
     private Integer id;
+    @Size(min = 1, max = 45)
     private String name;
+    @Size(min = 1, max = 200)
     private String description;
+    @Min(1)
     private Integer price;
+    @Min(1)
     private Integer duration;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime createDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime lastUpdateDate;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> tagList;
-
-    public void setTagListWithTags(List<Tag> tagList) {
-        this.tagList = new ArrayList<>();
-        tagList.forEach(tag -> this.tagList.add(tag.getName()));
-    }
-
-    public void setTagList(List<String> tagList){
-        this.tagList = tagList;
-    }
 }
