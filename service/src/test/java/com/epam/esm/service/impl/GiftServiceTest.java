@@ -10,6 +10,7 @@ import com.epam.esm.model.Gift;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.GiftService;
 import com.epam.esm.util.GiftQueryParameters;
+import com.epam.esm.util.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +45,7 @@ class GiftServiceTest {
     private GiftDTO giftDTO;
     private List<GiftDTO> giftDTOList;
     private List<Gift> giftList;
+    private Page page;
 
 
     @Mock
@@ -89,6 +91,7 @@ class GiftServiceTest {
         tag.setId(TEST_ID_1);
         tag.setName(TEST_NAME_1);
 
+        page = Page.getDefaultPage();
 
         giftService = new GiftService(giftDAO,tagDAO,orderDAO);
     }
@@ -153,8 +156,8 @@ class GiftServiceTest {
 
     @Test
     void getGifts() {
-        given(giftDAO.getGifts()).willReturn(giftList);
-        List<GiftDTO> gifts = giftService.getGifts();
+        given(giftDAO.getGifts(any(),any())).willReturn(giftList);
+        List<GiftDTO> gifts = giftService.getGifts(page);
         assertIterableEquals(giftDTOList,gifts);
     }
 
@@ -163,25 +166,9 @@ class GiftServiceTest {
         given(giftDAO.getGiftsByParams(any())).willReturn(giftList);
         GiftQueryParameters giftQueryParameters = new GiftQueryParameters();
         List<GiftDTO> giftsByParams = giftService.getGiftsByParams(giftQueryParameters);
-        verify(giftDAO).getGiftsByParams(GiftSqlBuilder.getGetWithParamsSQL(giftQueryParameters));
+        verify(giftDAO).getGiftsByParams(giftQueryParameters);
 
         assertIterableEquals(giftDTOList,giftsByParams);
-    }
-
-    @Test
-    void createGiftTag(){
-        doNothing().when(giftDAO).createGiftTag(TEST_ID_1, TEST_ID_1);
-        given(giftDAO.getGiftById(TEST_ID_1)).willReturn(Optional.of(gift1));
-        given(tagDAO.getTagById(TEST_ID_1)).willReturn(Optional.of(tag));
-        giftService.createGiftTag(TEST_ID_1, TEST_ID_1);
-        verify(giftDAO,times(1)).createGiftTag(anyInt(),anyInt());
-    }
-
-    @Test
-    void deleteGiftTag(){
-        given(giftDAO.getGiftById(TEST_ID_1)).willReturn(Optional.of(gift1));
-        giftService.deleteGiftTagByGiftId(TEST_ID_1);
-        verify(giftDAO,times(1)).deleteGiftTagByGiftId(anyInt());
     }
 
 

@@ -14,8 +14,5 @@ public class SpringBootStarter {
 
     public static void main(String[] args) {
         context = SpringApplication.run(SpringBootStarter.class, args);
-        for (String name : context.getBeanDefinitionNames()) {
-            System.out.println(name);
-        }
     }
 }

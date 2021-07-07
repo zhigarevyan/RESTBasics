@@ -29,6 +29,16 @@ public class Validator {
     }
 
     /**
+     * Validates object
+     *
+     * @param object is object parameter
+     * @return true if data is OK, false if data failed validation
+     */
+    public static boolean isValidObject(Object object) {
+        return object!=null;
+    }
+
+    /**
      * Validates GiftDTO
      *
      * @param gift is {@link GiftDTO} instance of giftDTO
@@ -41,11 +51,16 @@ public class Validator {
                 isValidNumber(gift.getPrice());
     }
 
-
+    /**
+     * Validates GiftDTO
+     *
+     * @param orderDTO is {@link OrderDTO} instance of OrderDTO
+     * @return true if data is OK, false if data failed validation
+     */
     public static boolean isValidOrderDTO(OrderDTO orderDTO) {
         return isValidNumber(orderDTO.getPrice())&&
-                isValidNumber(orderDTO.getGiftID())&&
-                isValidNumber(orderDTO.getUserID());
+                isValidNumber(orderDTO.getGifts().size())&&
+                isValidObject(orderDTO.getUser());
 
     }
 
@@ -55,7 +70,7 @@ public class Validator {
                 return false;
             }
         }
-        if(isValidNumber(parameter.getUser())){
+        if(!isValidNumber(parameter.getUser())){
             return false;
         }
         return true;

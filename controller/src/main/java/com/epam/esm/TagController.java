@@ -2,10 +2,12 @@ package com.epam.esm;
 
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.service.TagService;
+import com.epam.esm.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -17,25 +19,30 @@ public class TagController {
     public TagController(TagService tagService) {
         this.tagService = tagService;
     }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TagDTO createTag(@RequestBody TagDTO tagDTO){
+    public TagDTO createTag(@RequestBody TagDTO tagDTO) {
         return tagService.createTag(tagDTO.getName());
     }
+
     @GetMapping("/{id}")
-    public TagDTO getTagById(@PathVariable int id){
+    public TagDTO getTagById(@PathVariable int id) {
         return tagService.getTagById(id);
     }
+
     @GetMapping
-    public List<TagDTO> getTags(){
-        return tagService.getAllTags();
+    public List<TagDTO> getTags(@RequestBody @Valid Page page) {
+        return tagService.getAllTags(page);
     }
+
     @DeleteMapping("/{id}")
-    public void deleteTag(@PathVariable int id){
+    public void deleteTag(@PathVariable int id) {
         tagService.deleteTagById(id);
     }
+
     @GetMapping("/byName/{name}")
-    public TagDTO getTagByName(@PathVariable String name){
+    public TagDTO getTagByName(@PathVariable String name) {
         return tagService.getTagByName(name);
     }
 

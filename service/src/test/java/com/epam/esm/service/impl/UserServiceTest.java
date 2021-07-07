@@ -5,6 +5,7 @@ import com.epam.esm.dto.UserDTO;
 import com.epam.esm.exeption.impl.NoSuchUserException;
 import com.epam.esm.model.User;
 import com.epam.esm.service.UserService;
+import com.epam.esm.util.Page;
 import com.epam.esm.util.UserEntityToDTOMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,9 +33,12 @@ class UserServiceTest {
     private int TEST_ID = 1;
     private User user;
     private List<User> userList;
+    private Page page;
 
     @BeforeEach
     void setUp() {
+        page = Page.getDefaultPage();
+
         user = new User();
         user.setId(TEST_ID);
         user.setName(TEST_NAME);
@@ -60,9 +65,9 @@ class UserServiceTest {
 
     @Test
     void getAllUsers() {
-        given(userDAO.getAllUsers()).willReturn(userList);
-        List<UserDTO> allUsers = userService.getAllUsers();
+        given(userDAO.getAllUsers(page.getPage(), page.getSize())).willReturn(userList);
+        List<UserDTO> allUsers = userService.getAllUsers(page);
         List<UserDTO> userDTOList = UserEntityToDTOMapper.toDTO(userList);
-        assertEquals(userDTOList,allUsers);
+        assertEquals(userDTOList, allUsers);
     }
 }

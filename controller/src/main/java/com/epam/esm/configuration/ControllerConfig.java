@@ -53,12 +53,12 @@ public class ControllerConfig implements WebMvcConfigurer {
         return messageSource;
     }
 
-/*    @Bean
+    @Bean
     public LocalValidatorFactoryBean getValidator() {
         LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
         bean.setValidationMessageSource(messageSource());
         return bean;
-    }*/
+    }
 
 
 }

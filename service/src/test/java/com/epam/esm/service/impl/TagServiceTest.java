@@ -2,6 +2,7 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.GiftDAO;
 import com.epam.esm.dao.TagDAO;
+import com.epam.esm.dao.UserDAO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exeption.impl.DuplicateTagException;
 import com.epam.esm.exeption.impl.InvalidDataException;
@@ -9,6 +10,7 @@ import com.epam.esm.exeption.impl.NoSuchTagException;
 import com.epam.esm.model.Gift;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
+import com.epam.esm.util.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,6 +34,8 @@ class TagServiceTest {
     private TagDAO tagDAO;
     @Mock
     private GiftDAO giftDAO;
+    @Mock
+    private UserDAO userDAO;
     @InjectMocks
     private TagService tagService;
 
@@ -38,12 +43,15 @@ class TagServiceTest {
     private Gift gift;
     private List<Tag> tagList;
     private List<TagDTO> tagDTOList;
+    private Page page;
     private static final Integer TEST_ID = 1;
     private static final String TEST_NAME = "TEST TAG";
 
 
     @BeforeEach
     void setUp() {
+        page = Page.getDefaultPage();
+
         gift = new Gift();
 
         tag = new Tag();
@@ -59,7 +67,7 @@ class TagServiceTest {
         tagDTO.setName(TEST_NAME);
         tagDTOList.add(tagDTO);
 
-        tagService = new TagService(tagDAO,giftDAO);
+        tagService = new TagService(tagDAO, giftDAO, userDAO);
     }
 
     @Test
@@ -70,9 +78,9 @@ class TagServiceTest {
     }
 
     @Test
-    void createTagDuplicateTagException(){
+    void createTagDuplicateTagException() {
         given(tagDAO.getTagByName(TEST_NAME)).willReturn(Optional.of(tag));
-        assertThrows(DuplicateTagException.class,() -> tagService.createTag(TEST_NAME));
+        assertThrows(DuplicateTagException.class, () -> tagService.createTag(TEST_NAME));
     }
 
     @Test
@@ -83,16 +91,15 @@ class TagServiceTest {
     }
 
     @Test
-    void deleteTagByIdTagNoSuchTagException(){
+    void deleteTagByIdTagNoSuchTagException() {
         given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.empty());
-        assertThrows(NoSuchTagException.class,() -> tagService.deleteTagById(TEST_ID));
+        assertThrows(NoSuchTagException.class, () -> tagService.deleteTagById(TEST_ID));
     }
 
     @Test
-    void deleteTagByIdTagValidationException(){
+    void deleteTagByIdTagValidationException() {
         final int ID = -1;
-        given(tagDAO.getTagById(ID)).willReturn(Optional.of(tag));
-        assertThrows(InvalidDataException.class,() -> tagService.deleteTagById(ID));
+        assertThrows(InvalidDataException.class, () -> tagService.deleteTagById(ID));
     }
 
     @Test
@@ -106,13 +113,13 @@ class TagServiceTest {
     @Test
     void getTagByIdNoSuchTagException() {
         given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.empty());
-        assertThrows(NoSuchTagException.class,()-> tagService.getTagById(TEST_ID));
+        assertThrows(NoSuchTagException.class, () -> tagService.getTagById(TEST_ID));
     }
 
     @Test
     void getTagByIdInvalidDataException() {
         final int ID = -1;
-        assertThrows(InvalidDataException.class,()-> tagService.getTagById(ID));
+        assertThrows(InvalidDataException.class, () -> tagService.getTagById(ID));
     }
 
     @Test
@@ -126,13 +133,13 @@ class TagServiceTest {
     @Test
     void getTagByNameNoSuchTagException() {
         given(tagDAO.getTagByName(TEST_NAME)).willReturn(Optional.empty());
-        assertThrows(NoSuchTagException.class,()-> tagService.getTagByName(TEST_NAME));
+        assertThrows(NoSuchTagException.class, () -> tagService.getTagByName(TEST_NAME));
     }
 
     @Test
     void getTagByNameInvalidDataException() {
         final String NAME = "";
-        assertThrows(InvalidDataException.class,()-> tagService.getTagByName(NAME));
+        assertThrows(InvalidDataException.class, () -> tagService.getTagByName(NAME));
     }
 
 
@@ -141,20 +148,20 @@ class TagServiceTest {
         given(tagDAO.getTagListByGiftId(TEST_ID)).willReturn(tagList);
         given(giftDAO.getGiftById(TEST_ID)).willReturn(Optional.of(gift));
         List<TagDTO> tagListByGiftId = tagService.getTagListByGiftId(TEST_ID);
-        assertIterableEquals(tagDTOList,tagListByGiftId);
+        assertIterableEquals(tagDTOList, tagListByGiftId);
 
     }
 
     @Test
     void getTagListByGiftIdInvalidDataException() {
         final int ID = -1;
-        assertThrows(InvalidDataException.class,()-> tagService.getTagListByGiftId(ID));
+        assertThrows(InvalidDataException.class, () -> tagService.getTagListByGiftId(ID));
     }
 
     @Test
     void getAllTags() {
-        given(tagDAO.getAllTags()).willReturn(tagList);
-        List<TagDTO> allTags = tagService.getAllTags();
-        assertIterableEquals(tagDTOList,allTags);
+        given(tagDAO.getAllTags(page.getPage(), page.getSize())).willReturn(tagList);
+        List<TagDTO> allTags = tagService.getAllTags(page);
+        assertIterableEquals(tagDTOList, allTags);
     }
 }

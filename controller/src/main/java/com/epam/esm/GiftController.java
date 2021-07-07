@@ -5,10 +5,12 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.service.GiftService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.GiftQueryParameters;
+import com.epam.esm.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -25,7 +27,7 @@ public class GiftController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public GiftDTO createGift(@RequestBody GiftDTO giftDTO) {
+    public GiftDTO createGift(@RequestBody @Valid GiftDTO giftDTO) {
         return giftService.createGift(giftDTO);
     }
 
@@ -34,13 +36,8 @@ public class GiftController {
         return giftService.getGiftById(id);
     }
 
-    @GetMapping("/")
-    public List<GiftDTO> getGifts() {
-        return giftService.getGifts();
-    }
-
-    @GetMapping("/byParams")
-    public List<GiftDTO> getGiftsByParams(@RequestBody GiftQueryParameters params) {
+    @GetMapping
+    public List<GiftDTO> getGiftsByParams(@Valid GiftQueryParameters params) {
         return giftService.getGiftsByParams(params);
     }
 
@@ -60,5 +57,6 @@ public class GiftController {
     public List<TagDTO> getTagsByGiftId(@PathVariable int id) {
         return tagService.getTagListByGiftId(id);
     }
+
 
 }
