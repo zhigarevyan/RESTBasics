@@ -3,7 +3,9 @@ package com.epam.esm;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.Page;
+import com.epam.esm.util.assembler.TagModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,26 +16,29 @@ import java.util.List;
 @RequestMapping(value = "/tags")
 public class TagController {
     private final TagService tagService;
+    private final TagModelAssembler tagModelAssembler;
 
     @Autowired
-    public TagController(TagService tagService) {
+    public TagController(TagService tagService, TagModelAssembler tagModelAssembler) {
         this.tagService = tagService;
+        this.tagModelAssembler = tagModelAssembler;
     }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TagDTO createTag(@RequestBody TagDTO tagDTO) {
-        return tagService.createTag(tagDTO.getName());
+    public EntityModel<TagDTO> createTag(@RequestBody TagDTO tagDTO) {
+        return tagModelAssembler.toModel(tagService.createTag(tagDTO.getName()));
     }
 
     @GetMapping("/{id}")
-    public TagDTO getTagById(@PathVariable int id) {
-        return tagService.getTagById(id);
+    public EntityModel<TagDTO> getTagById(@PathVariable int id) {
+        return tagModelAssembler.toModel(tagService.getTagById(id));
     }
 
     @GetMapping
-    public List<TagDTO> getTags(@RequestBody @Valid Page page) {
-        return tagService.getAllTags(page);
+    public List<EntityModel<TagDTO>> getTags(@RequestBody @Valid Page page) {
+        return tagModelAssembler.toModel(tagService.getAllTags(page));
     }
 
     @DeleteMapping("/{id}")
@@ -42,8 +47,8 @@ public class TagController {
     }
 
     @GetMapping("/byName/{name}")
-    public TagDTO getTagByName(@PathVariable String name) {
-        return tagService.getTagByName(name);
+    public EntityModel<TagDTO> getTagByName(@PathVariable String name) {
+        return tagModelAssembler.toModel(tagService.getTagByName(name));
     }
 
 }

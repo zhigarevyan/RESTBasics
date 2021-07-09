@@ -16,8 +16,9 @@ public class UserEntityToDTOMapper {
 
     public static UserDTO toDTO(User user) {
         UserDTO userDTO = new UserDTO();
-        userDTO.setId(userDTO.getId());
-        userDTO.setName(userDTO.getName());
+        userDTO.setId(user.getId());
+        userDTO.setName(user.getName());
+        userDTO.setOrderList(UserEntityToDTOMapper.toUserOrder(user.getOrderList()));
         return userDTO;
     }
 

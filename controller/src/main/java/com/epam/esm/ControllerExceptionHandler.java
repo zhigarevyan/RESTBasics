@@ -51,7 +51,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoSuchOrderException.class)
     public ResponseEntity<ExceptionResponse> handleNoSuchOrderException(NoSuchOrderException e, Locale locale){
-        String message = messageSource.getMessage(NO_SUCH_GIFT, new Object[]{}, locale);
+        String message = messageSource.getMessage(NO_SUCH_ORDER, new Object[]{}, locale);
         ExceptionResponse exceptionResponse = new ExceptionResponse(message, e.getErrorCode());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
