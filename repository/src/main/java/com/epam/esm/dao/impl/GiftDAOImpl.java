@@ -10,16 +10,13 @@ import com.epam.esm.util.GiftQueryParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -96,7 +93,8 @@ public class GiftDAOImpl implements GiftDAO {
     }
 
     @Override
-    public List<Gift> getGiftCertificateListByOrderID(int id) {
+    public List<Gift> getGiftListByOrderID(int id, int page, int size) {
+        final int PAGE_OFFSET = 1;
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Gift> giftCertificateQuery = criteriaBuilder.createQuery(Gift.class);
 
@@ -105,8 +103,8 @@ public class GiftDAOImpl implements GiftDAO {
         giftCertificateQuery
                 .select(giftCertificateList)
                 .where(criteriaBuilder.equal(giftRoot.get(Order_.ID), id));
-
-        return entityManager.createQuery(giftCertificateQuery).getResultList();
+        int itemsOffset = (page - PAGE_OFFSET) * size;
+        return entityManager.createQuery(giftCertificateQuery).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
     }
 
 

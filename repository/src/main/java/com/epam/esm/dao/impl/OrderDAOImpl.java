@@ -38,14 +38,16 @@ public class OrderDAOImpl implements OrderDAO {
      * @return List of all {@link Order} entities from database.
      */
     @Override
-    public List<Order> getOrdersByUserId(int userId) {
+    public List<Order> getOrdersByUserId(int userId, int page, int size) {
+        final int PAGE_OFFSET = 1;
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
         CriteriaQuery<Order> query = criteriaBuilder.createQuery(Order.class);
         Root<Order> root = query.from(Order.class);
         query.select(root).where(criteriaBuilder.equal(root.get(Order_.USER), userId));
 
-        return entityManager.createQuery(query).getResultList();
+        int itemsOffset = (page - PAGE_OFFSET) * size;
+        return entityManager.createQuery(query).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
     }
     /**
      * Connects to database and returns all Orders.
@@ -73,7 +75,7 @@ public class OrderDAOImpl implements OrderDAO {
         LocalDateTime currentLocalDateTime = LocalDateTime.now();
         order.setDate(currentLocalDateTime.toInstant(ZoneOffset.UTC));
         entityManager.persist(order);
-        entityManager.detach(order);
+
         return order;
     }
 }

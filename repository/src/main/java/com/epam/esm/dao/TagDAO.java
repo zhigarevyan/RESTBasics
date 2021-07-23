@@ -48,7 +48,7 @@ public interface TagDAO {
      * @param giftId is GiftCertificate
      * @return List of matched {@link Tag} entities from database.
      */
-    List<Tag> getTagListByGiftId(int giftId);
+    List<Tag> getTagListByGiftId(int giftId, int page, int size);
 
     /**
      * Connects to database and returns all Tags.

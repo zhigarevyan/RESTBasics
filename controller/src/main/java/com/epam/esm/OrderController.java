@@ -52,8 +52,8 @@ public class OrderController {
     }
 
     @GetMapping("/{id}/gifts")
-    public List<EntityModel<GiftDTO>> getGiftCertificateListByOrderID(@PathVariable int id) {
-        return giftModelAssembler.toModel(giftService.getCertificateListByOrderID(id));
+    public List<EntityModel<GiftDTO>> getGiftCertificateListByOrderID(@PathVariable int id,@Valid Page page) {
+        return giftModelAssembler.toModel(giftService.getCertificateListByOrderID(id,page));
     }
 
     @GetMapping("/{orderId}")
@@ -62,8 +62,8 @@ public class OrderController {
     }
 
     @GetMapping("/byUser/{id}")
-    public List<EntityModel<OrderDTO>> getOrdersByUserId(@PathVariable int id) {
-        return orderModelAssembler.toModel(orderService.getOrdersByUserId(id));
+    public List<EntityModel<OrderDTO>> getOrdersByUserId(@PathVariable int id,@Valid Page page) {
+        return orderModelAssembler.toModel(orderService.getOrdersByUserId(id, page));
     }
 
     @GetMapping("highest-cost/user/most-used-tag")

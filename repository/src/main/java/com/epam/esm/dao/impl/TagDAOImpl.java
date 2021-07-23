@@ -1,8 +1,8 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDAO;
-import com.epam.esm.model.*;
 import com.epam.esm.model.Order;
+import com.epam.esm.model.*;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -82,7 +82,8 @@ public class TagDAOImpl implements TagDAO {
      * @return List of matched {@link Tag} entities from database.
      */
     @Override
-    public List<Tag> getTagListByGiftId(int giftId) {
+    public List<Tag> getTagListByGiftId(int giftId, int page, int size) {
+        final int PAGE_OFFSET = 1;
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tag> tagQuery = criteriaBuilder.createQuery(Tag.class);
 
@@ -91,8 +92,8 @@ public class TagDAOImpl implements TagDAO {
         tagQuery
                 .select(tagList)
                 .where(criteriaBuilder.equal(giftRoot.get(Gift_.ID), giftId));
-
-        return entityManager.createQuery(tagQuery).getResultList();
+        int itemsOffset = (page - PAGE_OFFSET) * size;
+        return entityManager.createQuery(tagQuery).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
     }
 
     /**

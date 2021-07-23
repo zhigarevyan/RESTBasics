@@ -1,6 +1,7 @@
 package com.epam.esm.util;
 
 import lombok.Data;
+
 import javax.validation.constraints.Min;
 
 @Data

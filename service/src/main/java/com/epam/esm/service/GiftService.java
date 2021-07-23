@@ -176,13 +176,13 @@ public class GiftService {
         return toDTO(giftList);
     }
 
-    public List<GiftDTO> getCertificateListByOrderID(int id) {
+    public List<GiftDTO> getCertificateListByOrderID(int id, Page page) {
         if (orderDAO.getOrderById(id).isEmpty()) {
             throw new NoSuchOrderException(
                     String.format(MESSAGE_NO_SUCH_ORDER_EXCEPTION, id),
                     String.format(ERROR_CODE_NO_SUCH_ORDER, id));
         }
-        List<Gift> giftList = giftDAO.getGiftCertificateListByOrderID(id);
+        List<Gift> giftList = giftDAO.getGiftListByOrderID(id,page.getPage(), page.getSize());
 
         return toDTO(giftList);
     }

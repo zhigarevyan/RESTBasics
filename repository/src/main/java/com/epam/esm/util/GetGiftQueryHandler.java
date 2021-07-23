@@ -134,7 +134,8 @@ public class GetGiftQueryHandler {
         int size = pageObject.getSize();
         int itemsOffset = (pageObject.getPage() - PAGE_NUMBER_OFFSET) * size;
 
-        return entityManager.createQuery(criteriaQuery).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
+        List<Gift> resultList = entityManager.createQuery(criteriaQuery).setFirstResult(itemsOffset).setMaxResults(size).getResultList();
+        return resultList;
     }
 
     private static Predicate filterToPredicate(

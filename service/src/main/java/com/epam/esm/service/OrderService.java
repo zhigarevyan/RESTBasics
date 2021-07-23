@@ -18,8 +18,8 @@ import com.epam.esm.util.Page;
 import com.epam.esm.util.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -110,7 +110,7 @@ public class OrderService {
      * @throws NoSuchUserException  if no User with provided id founded
      * @throws InvalidDataException if data failed validation
      */
-    public List<OrderDTO> getOrdersByUserId(int userId) {
+    public List<OrderDTO> getOrdersByUserId(int userId,Page page) {
         if (!Validator.isValidNumber(userId)) {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION);
         }
@@ -119,7 +119,7 @@ public class OrderService {
                     String.format(MESSAGE_NO_SUCH_USER_EXCEPTION, userId),
                     String.format(ERROR_CODE_NO_SUCH_USER_EXCEPTION, userId));
         }
-        return OrderEntityToDTOMapper.toDTO(orderDAO.getOrdersByUserId(userId));
+        return OrderEntityToDTOMapper.toDTO(orderDAO.getOrdersByUserId(userId,page.getPage(), page.getSize()));
     }
 
     /**
@@ -131,6 +131,7 @@ public class OrderService {
      * @throws NoSuchGiftException  if gift with provided id wasn't found
      * @throws NoSuchUserException  if user with provided id wasn't found
      */
+    @Transactional
     public OrderDTO createOrder(CreateOrderParameter parameter) {
         int orderPrice = 0;
         List<Gift> giftList = new ArrayList<>();
@@ -158,6 +159,7 @@ public class OrderService {
         order.setUser(user);
         order.setGiftList(giftList);
         order.setPrice(orderPrice);
+
         return OrderEntityToDTOMapper.toDTO(orderDAO.createOrder(order));
     }
 

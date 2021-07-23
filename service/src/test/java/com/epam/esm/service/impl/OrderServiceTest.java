@@ -30,9 +30,9 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -161,21 +161,21 @@ class OrderServiceTest {
     @Test
     void getOrdersByUserId() {
         given(userDAO.getUserById(TEST_ID)).willReturn(Optional.of(user));
-        given(orderDAO.getOrdersByUserId(TEST_ID)).willReturn(orderList);
-        List<OrderDTO> ordersByUserId = orderService.getOrdersByUserId(TEST_ID);
+        given(orderDAO.getOrdersByUserId(TEST_ID,any(),any())).willReturn(orderList);
+        List<OrderDTO> ordersByUserId = orderService.getOrdersByUserId(TEST_ID,page);
         List<OrderDTO> orderDTOList = OrderEntityToDTOMapper.toDTO(orderList);
         assertEquals(orderDTOList, ordersByUserId);
     }
 
     @Test
     void getOrdersByUserIdInvalidDataException() {
-        assertThrows(InvalidDataException.class, () -> orderService.getOrdersByUserId(-TEST_ID));
+        assertThrows(InvalidDataException.class, () -> orderService.getOrdersByUserId(-TEST_ID,page));
     }
 
     @Test
     void getOrdersByUserNoSuchUserException() {
         given(userDAO.getUserById(TEST_ID)).willReturn(Optional.empty());
-        assertThrows(NoSuchUserException.class, () -> orderService.getOrdersByUserId(TEST_ID));
+        assertThrows(NoSuchUserException.class, () -> orderService.getOrdersByUserId(TEST_ID,page));
     }
 
     @Test

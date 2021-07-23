@@ -23,9 +23,9 @@ public class OrderModelAssembler implements RepresentationModelAssembler<OrderDT
         return EntityModel.of(orderDTO,
                 linkTo(methodOn(OrderController.class).getOrderById(orderDTO.getId())).withSelfRel(),
                 linkTo(methodOn(OrderController.class).getAllOrders(Page.getDefaultPage())).withRel("Orders"),
-                linkTo(methodOn(OrderController.class).getGiftCertificateListByOrderID(orderDTO.getId())).withRel(
+                linkTo(methodOn(OrderController.class).getGiftCertificateListByOrderID(orderDTO.getId(),Page.getDefaultPage())).withRel(
                         "Gifts"),
-                linkTo(methodOn(UserController.class).getUserById(orderDTO.getId())).withRel("User"));
+                linkTo(methodOn(UserController.class).getUserById(orderDTO.getUser().getId())).withRel("User"));
     }
 
     public List<EntityModel<OrderDTO>> toModel(List<OrderDTO> orderDTO) {

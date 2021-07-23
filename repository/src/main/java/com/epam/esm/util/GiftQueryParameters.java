@@ -2,7 +2,6 @@ package com.epam.esm.util;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.Valid;

@@ -179,7 +179,7 @@ public class TagService {
      * @throws NoSuchGiftException  if no Gift with provided id founded
      * @throws InvalidDataException if data failed validation
      */
-    public List<TagDTO> getTagListByGiftId(int giftId) {
+    public List<TagDTO> getTagListByGiftId(int giftId,Page page) {
         if (!Validator.isValidNumber(giftId)) {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
         }
@@ -187,7 +187,7 @@ public class TagService {
             throw new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, giftId),
                     String.format(ERROR_CODE_NO_SUCH_GIFT, giftId));
         }
-        return TagEntityDTOMapper.toDTO(tagDAO.getTagListByGiftId(giftId));
+        return TagEntityDTOMapper.toDTO(tagDAO.getTagListByGiftId(giftId,page.getPage(), page.getSize()));
     }
 
     /**
@@ -204,6 +204,7 @@ public class TagService {
      *
      * @return {@link TagDTO} object with tag data.
      */
+    @Transactional
     public TagDTO getMostWidelyUsedTagFromUserWithHighestCostOfAllOrders() {
         User user = userDAO.getUserWithHighestCostOfAllOrders();
 

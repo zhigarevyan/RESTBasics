@@ -54,7 +54,7 @@ public interface GiftDAO {
     /**
      * Connects to database and returns list of matching Gifts
      *
-     * @param getSql String object containing SQL string and params for request
+     * @param parameters {@link GiftQueryParameters} object containing params for request
      * @return List of matched {@link Gift} entities from database.
      */
     List<Gift> getGiftsByParams(GiftQueryParameters parameters);
@@ -65,6 +65,6 @@ public interface GiftDAO {
      * @param id is Order id
      * @return List of matched {@link Gift} entities from database.
      */
-    public List<Gift> getGiftCertificateListByOrderID(int id);
+    List<Gift> getGiftListByOrderID(int id, int page, int size);
 
 }

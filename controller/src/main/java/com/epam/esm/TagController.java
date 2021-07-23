@@ -37,7 +37,7 @@ public class TagController {
     }
 
     @GetMapping
-    public List<EntityModel<TagDTO>> getTags(@RequestBody @Valid Page page) {
+    public List<EntityModel<TagDTO>> getTags(@Valid Page page) {
         return tagModelAssembler.toModel(tagService.getAllTags(page));
     }
 

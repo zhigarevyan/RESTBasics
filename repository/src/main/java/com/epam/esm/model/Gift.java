@@ -52,8 +52,8 @@ public class Gift {
     })
     @JoinTable(
             name = "gift_tag",
-            joinColumns = {@JoinColumn(name = "gift_id", nullable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "tag_id", nullable = false)})
+            joinColumns = {@JoinColumn(name = "gift_id", referencedColumnName = "id", nullable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "tag_id",referencedColumnName = "id", nullable = false)})
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Tag> tagList;
 

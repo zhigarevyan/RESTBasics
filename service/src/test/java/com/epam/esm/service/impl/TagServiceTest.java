@@ -145,9 +145,9 @@ class TagServiceTest {
 
     @Test
     void getTagListByGiftId() {
-        given(tagDAO.getTagListByGiftId(TEST_ID)).willReturn(tagList);
+        given(tagDAO.getTagListByGiftId(TEST_ID,any(),any())).willReturn(tagList);
         given(giftDAO.getGiftById(TEST_ID)).willReturn(Optional.of(gift));
-        List<TagDTO> tagListByGiftId = tagService.getTagListByGiftId(TEST_ID);
+        List<TagDTO> tagListByGiftId = tagService.getTagListByGiftId(TEST_ID,page);
         assertIterableEquals(tagDTOList, tagListByGiftId);
 
     }
@@ -155,7 +155,7 @@ class TagServiceTest {
     @Test
     void getTagListByGiftIdInvalidDataException() {
         final int ID = -1;
-        assertThrows(InvalidDataException.class, () -> tagService.getTagListByGiftId(ID));
+        assertThrows(InvalidDataException.class, () -> tagService.getTagListByGiftId(ID,page));
     }
 
     @Test

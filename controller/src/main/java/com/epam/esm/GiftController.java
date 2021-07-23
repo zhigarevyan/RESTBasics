@@ -5,6 +5,7 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.service.GiftService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.GiftQueryParameters;
+import com.epam.esm.util.Page;
 import com.epam.esm.util.assembler.GiftModelAssembler;
 import com.epam.esm.util.assembler.TagModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class GiftController {
 
     @GetMapping
     public List<EntityModel<GiftDTO>> getGiftsByParams(@Valid GiftQueryParameters params) {
-        return giftModelAssembler.toModel(giftService.getGiftsByParams(params));
+            return giftModelAssembler.toModel(giftService.getGiftsByParams(params));
     }
 
     @PutMapping("/{id}")
@@ -61,8 +62,8 @@ public class GiftController {
     }
 
     @GetMapping("/{id}/tags")
-    public List<EntityModel<TagDTO>> getTagsByGiftId(@PathVariable int id) {
-        return tagModelAssembler.toModel(tagService.getTagListByGiftId(id));
+    public List<EntityModel<TagDTO>> getTagsByGiftId(@PathVariable int id,@Valid Page page) {
+        return tagModelAssembler.toModel(tagService.getTagListByGiftId(id,page));
     }
 
 

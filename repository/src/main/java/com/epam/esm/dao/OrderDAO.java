@@ -23,7 +23,7 @@ public interface OrderDAO {
      * @param userId is User ID value.
      * @return List of all {@link Order} entities from database.
      */
-    List<Order> getOrdersByUserId(int userId);
+    List<Order> getOrdersByUserId(int userId, int page, int size);
 
     /**
      * Connects to database and returns all Orders.

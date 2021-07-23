@@ -35,8 +35,8 @@ public class Order {
     })
     @JoinTable(
             name = "order_gift",
-            joinColumns = @JoinColumn(name = "order_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "gift_id", nullable = false))
+            joinColumns = @JoinColumn(name = "order_id", referencedColumnName = "id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "gift_id", referencedColumnName = "id" ,nullable = false))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Gift> giftList;
 }
