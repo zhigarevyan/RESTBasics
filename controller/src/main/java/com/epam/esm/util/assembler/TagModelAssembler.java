@@ -2,7 +2,7 @@ package com.epam.esm.util.assembler;
 
 import com.epam.esm.TagController;
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.util.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class TagModelAssembler implements RepresentationModelAssembler<TagDTO,
     public EntityModel<TagDTO> toModel(TagDTO tagDTO) {
         return EntityModel.of(tagDTO,
                 linkTo(methodOn(TagController.class).getTagById(tagDTO.getId())).withSelfRel(),
-                linkTo(methodOn(TagController.class).getTags(Page.getDefaultPage())).withRel("Tags"));
+                linkTo(methodOn(TagController.class).getTags(Pageable.unpaged())).withRel("Tags"));
     }
 
     public List<EntityModel<TagDTO>> toModel(List<TagDTO> tagDTO) {

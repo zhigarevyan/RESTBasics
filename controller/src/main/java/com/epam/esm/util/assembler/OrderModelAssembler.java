@@ -3,7 +3,7 @@ package com.epam.esm.util.assembler;
 import com.epam.esm.OrderController;
 import com.epam.esm.UserController;
 import com.epam.esm.dto.OrderDTO;
-import com.epam.esm.util.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -22,8 +22,8 @@ public class OrderModelAssembler implements RepresentationModelAssembler<OrderDT
     public EntityModel<OrderDTO> toModel(OrderDTO orderDTO) {
         return EntityModel.of(orderDTO,
                 linkTo(methodOn(OrderController.class).getOrderById(orderDTO.getId())).withSelfRel(),
-                linkTo(methodOn(OrderController.class).getAllOrders(Page.getDefaultPage())).withRel("Orders"),
-                linkTo(methodOn(OrderController.class).getGiftCertificateListByOrderID(orderDTO.getId(),Page.getDefaultPage())).withRel(
+                linkTo(methodOn(OrderController.class).getAllOrders(Pageable.unpaged())).withRel("Orders"),
+                linkTo(methodOn(OrderController.class).getGiftCertificateListByOrderID(orderDTO.getId(),Pageable.unpaged())).withRel(
                         "Gifts"),
                 linkTo(methodOn(UserController.class).getUserById(orderDTO.getUser().getId())).withRel("User"));
     }

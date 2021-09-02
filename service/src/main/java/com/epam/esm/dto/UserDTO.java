@@ -11,5 +11,6 @@ public class UserDTO {
 
     private Integer id;
     private String name;
+    private String login;
     private List<UserOrderDTO> orderList;
 }

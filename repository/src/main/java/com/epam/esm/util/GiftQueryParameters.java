@@ -21,8 +21,7 @@ public class GiftQueryParameters {
     private List<Filter> duration;
     private List<String> tagName;
     private Sort sort;
-    @Valid
-    private Page page = Page.getDefaultPage();
+
 
     public GiftQueryParameters(String name, String description, List<String> price,
                                List<String> duration, String sort, List<String> tagName) {
@@ -52,14 +51,6 @@ public class GiftQueryParameters {
 
     public void setDuration(List<String> duration) {
         this.duration = FilterParser.createFilter(duration);
-    }
-
-    public void setPage(int page) {
-        this.page.setPage(page);
-    }
-
-    public void setSize(int size) {
-        this.page.setSize(size);
     }
 
     public void setSort(String sortBy) {

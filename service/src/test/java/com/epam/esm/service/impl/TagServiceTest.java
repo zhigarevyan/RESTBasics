@@ -1,22 +1,25 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.GiftDAO;
-import com.epam.esm.dao.TagDAO;
-import com.epam.esm.dao.UserDAO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exeption.impl.DuplicateTagException;
 import com.epam.esm.exeption.impl.InvalidDataException;
 import com.epam.esm.exeption.impl.NoSuchTagException;
 import com.epam.esm.model.Gift;
 import com.epam.esm.model.Tag;
+import com.epam.esm.repository.GiftRepository;
+import com.epam.esm.repository.TagRepository;
+import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.TagService;
-import com.epam.esm.util.Page;
+import com.epam.esm.util.specification.TagSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +28,16 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
     @Mock
-    private TagDAO tagDAO;
+    private TagRepository tagRepository;
     @Mock
-    private GiftDAO giftDAO;
+    private GiftRepository giftRepository;
     @Mock
-    private UserDAO userDAO;
+    private UserRepository userRepository;
     @InjectMocks
     private TagService tagService;
 
@@ -43,14 +45,14 @@ class TagServiceTest {
     private Gift gift;
     private List<Tag> tagList;
     private List<TagDTO> tagDTOList;
-    private Page page;
-    private static final Integer TEST_ID = 1;
+    private Pageable page;
+    private static final int TEST_ID = 1;
     private static final String TEST_NAME = "TEST TAG";
 
 
     @BeforeEach
     void setUp() {
-        page = Page.getDefaultPage();
+        page = Pageable.unpaged();
 
         gift = new Gift();
 
@@ -67,32 +69,32 @@ class TagServiceTest {
         tagDTO.setName(TEST_NAME);
         tagDTOList.add(tagDTO);
 
-        tagService = new TagService(tagDAO, giftDAO, userDAO);
+        tagService = new TagService(tagRepository, giftRepository, userRepository);
     }
 
     @Test
     void createTag() {
-        given(tagDAO.createTag(TEST_NAME)).willReturn(tag);
+        given(tagRepository.save(any())).willReturn(tag);
         TagDTO actualTagDTO = tagService.createTag(TEST_NAME);
         assertEquals(TEST_NAME, actualTagDTO.getName());
     }
 
     @Test
     void createTagDuplicateTagException() {
-        given(tagDAO.getTagByName(TEST_NAME)).willReturn(Optional.of(tag));
+        given(tagRepository.findByName(TEST_NAME)).willReturn(Optional.of(tag));
         assertThrows(DuplicateTagException.class, () -> tagService.createTag(TEST_NAME));
     }
 
     @Test
     void deleteTagById() {
-        given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.of(tag));
+        given(tagRepository.findById(TEST_ID)).willReturn(Optional.of(tag));
         tagService.deleteTagById(TEST_ID);
-        verify(tagDAO, times(1)).deleteTagById(TEST_ID);
+        verify(tagRepository, times(1)).deleteById(TEST_ID);
     }
 
     @Test
     void deleteTagByIdTagNoSuchTagException() {
-        given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.empty());
+        given(tagRepository.findById(TEST_ID)).willReturn(Optional.empty());
         assertThrows(NoSuchTagException.class, () -> tagService.deleteTagById(TEST_ID));
     }
 
@@ -104,7 +106,7 @@ class TagServiceTest {
 
     @Test
     void getTagById() {
-        given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.of(tag));
+        given(tagRepository.findById(TEST_ID)).willReturn(Optional.of(tag));
         TagDTO tagDTO = tagService.getTagById(TEST_ID);
         assertEquals(tagDTO.getName(), TEST_NAME);
         assertEquals(tagDTO.getId(), TEST_ID);
@@ -112,7 +114,7 @@ class TagServiceTest {
 
     @Test
     void getTagByIdNoSuchTagException() {
-        given(tagDAO.getTagById(TEST_ID)).willReturn(Optional.empty());
+        given(tagRepository.findById(TEST_ID)).willReturn(Optional.empty());
         assertThrows(NoSuchTagException.class, () -> tagService.getTagById(TEST_ID));
     }
 
@@ -124,7 +126,7 @@ class TagServiceTest {
 
     @Test
     void getTagByName() {
-        given(tagDAO.getTagByName(TEST_NAME)).willReturn(Optional.of(tag));
+        given(tagRepository.findByName(TEST_NAME)).willReturn(Optional.of(tag));
         TagDTO tagDTO = tagService.getTagByName(TEST_NAME);
         assertEquals(tagDTO.getName(), TEST_NAME);
         assertEquals(tagDTO.getId(), TEST_ID);
@@ -132,7 +134,7 @@ class TagServiceTest {
 
     @Test
     void getTagByNameNoSuchTagException() {
-        given(tagDAO.getTagByName(TEST_NAME)).willReturn(Optional.empty());
+        given(tagRepository.findByName(TEST_NAME)).willReturn(Optional.empty());
         assertThrows(NoSuchTagException.class, () -> tagService.getTagByName(TEST_NAME));
     }
 
@@ -145,8 +147,10 @@ class TagServiceTest {
 
     @Test
     void getTagListByGiftId() {
-        given(tagDAO.getTagListByGiftId(TEST_ID,any(),any())).willReturn(tagList);
-        given(giftDAO.getGiftById(TEST_ID)).willReturn(Optional.of(gift));
+        Page<Tag> pageable = mock(Page.class);
+        given(giftRepository.findById(TEST_ID)).willReturn(Optional.of(gift));
+        given(tagRepository.findAll(any(Specification.class),any(Pageable.class))).willReturn(pageable);
+        when(pageable.toList()).thenReturn(tagList);
         List<TagDTO> tagListByGiftId = tagService.getTagListByGiftId(TEST_ID,page);
         assertIterableEquals(tagDTOList, tagListByGiftId);
 
@@ -160,7 +164,9 @@ class TagServiceTest {
 
     @Test
     void getAllTags() {
-        given(tagDAO.getAllTags(page.getPage(), page.getSize())).willReturn(tagList);
+        Page<Tag> pageable = mock(Page.class);
+        given(tagRepository.findAll(any(Pageable.class))).willReturn(pageable);
+        when(pageable.toList()).thenReturn(tagList);
         List<TagDTO> allTags = tagService.getAllTags(page);
         assertIterableEquals(tagDTOList, allTags);
     }

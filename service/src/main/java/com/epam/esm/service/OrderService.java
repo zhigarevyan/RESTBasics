@@ -1,8 +1,6 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dao.GiftDAO;
-import com.epam.esm.dao.OrderDAO;
-import com.epam.esm.dao.UserDAO;
+
 import com.epam.esm.dto.OrderDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exeption.impl.InvalidDataException;
@@ -12,11 +10,14 @@ import com.epam.esm.exeption.impl.NoSuchUserException;
 import com.epam.esm.model.Gift;
 import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
+import com.epam.esm.repository.GiftRepository;
+import com.epam.esm.repository.OrderRepository;
+import com.epam.esm.repository.UserRepository;
 import com.epam.esm.util.CreateOrderParameter;
 import com.epam.esm.util.OrderEntityToDTOMapper;
-import com.epam.esm.util.Page;
 import com.epam.esm.util.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,32 +60,33 @@ public class OrderService {
      */
     private static final String ERROR_CODE_NO_SUCH_GIFT = "0102404_%d";
     /**
-     * An object of {@link OrderDAO}
+     * An object of {@link OrderRepository}
      */
-    private final OrderDAO orderDAO;
+    private final OrderRepository orderRepository;
     /**
-     * An object of {@link UserDAO}
+     * An object of {@link UserRepository}
      */
-    private final UserDAO userDAO;
+    private final UserRepository userRepository;
     /**
-     * An object of {@link GiftDAO}
+     * An object of {@link GiftRepository}
      */
-    private final GiftDAO giftDAO;
+    private final GiftRepository giftRepository;
 
     /**
-     * Public constructor that receives tagDAO
+     * Public constructor that receives tagRepository
      *
-     * @param orderDAO is {@link OrderDAO} interface providing DAO methods.
+     * @param orderRepository is {@link OrderRepository} interface providing Repository methods.
      */
     @Autowired
-    public OrderService(OrderDAO orderDAO, UserDAO userDAO, GiftDAO giftDAO) {
-        this.orderDAO = orderDAO;
-        this.userDAO = userDAO;
-        this.giftDAO = giftDAO;
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository,
+                        GiftRepository giftRepository) {
+        this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
+        this.giftRepository = giftRepository;
     }
 
     /**
-     * Invokes DAO method to get Order with provided id.
+     * Invokes Repository method to get Order with provided id.
      *
      * @param orderId is id of Order to be returned.
      * @return {@link OrderDTO} object with Order data.
@@ -95,35 +97,35 @@ public class OrderService {
         if (!Validator.isValidNumber(orderId)) {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION, ERROR_CODE_INVALID_DATA);
         }
-        if (orderDAO.getOrderById(orderId).isEmpty()) {
+        if (orderRepository.findById(orderId).isEmpty()) {
             throw new NoSuchOrderException(String.format(MESSAGE_NO_SUCH_ORDER_WITH_ID_EXCEPTION, orderId),
                     String.format(ERROR_CODE_NO_SUCH_ORDER_BY_ID, orderId));
         }
-        return OrderEntityToDTOMapper.toDTO(orderDAO.getOrderById(orderId).get());
+        return OrderEntityToDTOMapper.toDTO(orderRepository.findById(orderId).get());
     }
 
     /**
-     * Invokes DAO method to get List of all Tags that linked with GiftCertificate by it's id
+     * Invokes Repository method to get List of all Tags that linked with GiftCertificate by it's id
      *
      * @param userId is id of GiftCertificate.
      * @return List of {@link TagDTO} objects with tag data.
      * @throws NoSuchUserException  if no User with provided id founded
      * @throws InvalidDataException if data failed validation
      */
-    public List<OrderDTO> getOrdersByUserId(int userId,Page page) {
+    public List<OrderDTO> getOrdersByUserId(int userId) {
         if (!Validator.isValidNumber(userId)) {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION);
         }
-        if (userDAO.getUserById(userId).isEmpty()) {
+        if (userRepository.findById(userId).isEmpty()) {
             throw new NoSuchUserException(
                     String.format(MESSAGE_NO_SUCH_USER_EXCEPTION, userId),
                     String.format(ERROR_CODE_NO_SUCH_USER_EXCEPTION, userId));
         }
-        return OrderEntityToDTOMapper.toDTO(orderDAO.getOrdersByUserId(userId,page.getPage(), page.getSize()));
+        return OrderEntityToDTOMapper.toDTO(orderRepository.findByUserId(userId));
     }
 
     /**
-     * Invokes DAO method to create Order with provided data.
+     * Invokes Repository method to create Order with provided data.
      *
      * @param parameter is {@link CreateOrderParameter} object with Order data.
      * @return {@link OrderDTO} object with created data.
@@ -142,7 +144,7 @@ public class OrderService {
             throw new InvalidDataException(MESSAGE_INVALID_DATA_EXCEPTION);
         }
         for (Integer giftId : giftIds) {
-            Optional<Gift> giftById = giftDAO.getGiftById(giftId);
+            Optional<Gift> giftById = giftRepository.findById(giftId);
             Gift gift = giftById.orElseThrow(() ->
                     new NoSuchGiftException(
                             String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, giftId),
@@ -150,7 +152,7 @@ public class OrderService {
             orderPrice+=gift.getPrice();
             giftList.add(gift);
         }
-        Optional<User> userById = userDAO.getUserById(userId);
+        Optional<User> userById = userRepository.findById(userId);
         User user = userById.orElseThrow(() ->
                 new NoSuchUserException(
                         String.format(MESSAGE_NO_SUCH_USER_EXCEPTION, userId),
@@ -160,15 +162,15 @@ public class OrderService {
         order.setGiftList(giftList);
         order.setPrice(orderPrice);
 
-        return OrderEntityToDTOMapper.toDTO(orderDAO.createOrder(order));
+        return OrderEntityToDTOMapper.toDTO(orderRepository.save(order));
     }
 
     /**
-     * Invokes DAO method to get List of all Orders from database.
+     * Invokes Repository method to get List of all Orders from database.
      *
      * @return List of {@link OrderDTO} objects with order data.
      */
-    public List<OrderDTO> getAllOrders(Page page) {
-        return OrderEntityToDTOMapper.toDTO(orderDAO.getAllOrders(page.getPage(),page.getSize()));
+    public List<OrderDTO> getAllOrders(Pageable page) {
+        return OrderEntityToDTOMapper.toDTO(orderRepository.findAll(page).toList());
     }
 }

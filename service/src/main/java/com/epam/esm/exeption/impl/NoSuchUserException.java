@@ -7,6 +7,7 @@ public class NoSuchUserException extends ServiceException {
         super(message, errorCode);
     }
 
+
     @Override
     public String getErrorCode() {
         return super.getErrorCode();

@@ -1,8 +1,6 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.GiftDAO;
-import com.epam.esm.dao.OrderDAO;
-import com.epam.esm.dao.UserDAO;
+
 import com.epam.esm.dto.GiftDTO;
 import com.epam.esm.dto.OrderDTO;
 import com.epam.esm.dto.UserInOrderDTO;
@@ -13,16 +11,20 @@ import com.epam.esm.exeption.impl.NoSuchUserException;
 import com.epam.esm.model.Gift;
 import com.epam.esm.model.Order;
 import com.epam.esm.model.User;
+import com.epam.esm.repository.GiftRepository;
+import com.epam.esm.repository.OrderRepository;
+import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.util.CreateOrderParameter;
 import com.epam.esm.util.OrderEntityToDTOMapper;
-import com.epam.esm.util.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -35,15 +37,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
     @Mock
-    private OrderDAO orderDAO;
+    private OrderRepository orderRepository;
     @Mock
-    private UserDAO userDAO;
+    private UserRepository userRepository;
     @Mock
-    private GiftDAO giftDAO;
+    private GiftRepository giftRepository;
     @InjectMocks
     private OrderService orderService;
 
@@ -51,13 +55,10 @@ class OrderServiceTest {
     private Order orderToCreate;
     private OrderDTO orderDTO;
     private User user;
-    private UserInOrderDTO userInOrderDTO;
     private Gift gift;
-    private GiftDTO giftDTO;
     private List<Order> orderList;
     private List<Gift> giftList;
-    private List<GiftDTO> giftDTOList;
-    private Page page;
+    private Pageable page;
     private CreateOrderParameter createOrderParameter;
     private static final int TEST_PRICE = 10;
     private static final int TEST_DURATION = 10;
@@ -68,16 +69,16 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderDAO, userDAO, giftDAO);
+        orderService = new OrderService(orderRepository, userRepository, giftRepository);
         Instant now = Instant.now();
 
-        page = Page.getDefaultPage();
+        page = Pageable.unpaged();
 
         user = new User();
         user.setId(TEST_ID);
         user.setName(TEST_NAME);
 
-        userInOrderDTO = new UserInOrderDTO();
+        UserInOrderDTO userInOrderDTO = new UserInOrderDTO();
         userInOrderDTO.setId(TEST_ID);
         userInOrderDTO.setName(TEST_NAME);
 
@@ -92,7 +93,7 @@ class OrderServiceTest {
         gift.setLastUpdateDate(now);
 
 
-        giftDTO = new GiftDTO();
+        GiftDTO giftDTO = new GiftDTO();
         giftDTO.setId(TEST_ID);
         giftDTO.setName(TEST_NAME);
         giftDTO.setPrice(TEST_PRICE);
@@ -104,7 +105,7 @@ class OrderServiceTest {
         giftList = new ArrayList<>();
         giftList.add(gift);
 
-        giftDTOList = new ArrayList<>();
+        List<GiftDTO> giftDTOList = new ArrayList<>();
         giftDTOList.add(giftDTO);
 
         order = new Order();
@@ -141,7 +142,7 @@ class OrderServiceTest {
 
     @Test
     void getOrderById() {
-        given(orderDAO.getOrderById(TEST_ID)).willReturn(Optional.of(order));
+        given(orderRepository.findById(TEST_ID)).willReturn(Optional.of(order));
         OrderDTO orderById = orderService.getOrderById(TEST_ID);
         OrderDTO orderDTO = OrderEntityToDTOMapper.toDTO(order);
         assertEquals(orderDTO, orderById);
@@ -154,35 +155,35 @@ class OrderServiceTest {
 
     @Test
     void getOrderByIdNoSuchOrderException() {
-        given(orderDAO.getOrderById(TEST_ID)).willReturn(Optional.empty());
+        given(orderRepository.findById(TEST_ID)).willReturn(Optional.empty());
         assertThrows(NoSuchOrderException.class, () -> orderService.getOrderById(TEST_ID));
     }
 
     @Test
     void getOrdersByUserId() {
-        given(userDAO.getUserById(TEST_ID)).willReturn(Optional.of(user));
-        given(orderDAO.getOrdersByUserId(TEST_ID,any(),any())).willReturn(orderList);
-        List<OrderDTO> ordersByUserId = orderService.getOrdersByUserId(TEST_ID,page);
+        given(userRepository.findById(TEST_ID)).willReturn(Optional.of(user));
+        given(orderRepository.findByUserId(TEST_ID)).willReturn(orderList);
+        List<OrderDTO> ordersByUserId = orderService.getOrdersByUserId(TEST_ID);
         List<OrderDTO> orderDTOList = OrderEntityToDTOMapper.toDTO(orderList);
         assertEquals(orderDTOList, ordersByUserId);
     }
 
     @Test
     void getOrdersByUserIdInvalidDataException() {
-        assertThrows(InvalidDataException.class, () -> orderService.getOrdersByUserId(-TEST_ID,page));
+        assertThrows(InvalidDataException.class, () -> orderService.getOrdersByUserId(-TEST_ID));
     }
 
     @Test
     void getOrdersByUserNoSuchUserException() {
-        given(userDAO.getUserById(TEST_ID)).willReturn(Optional.empty());
-        assertThrows(NoSuchUserException.class, () -> orderService.getOrdersByUserId(TEST_ID,page));
+        given(userRepository.findById(TEST_ID)).willReturn(Optional.empty());
+        assertThrows(NoSuchUserException.class, () -> orderService.getOrdersByUserId(TEST_ID));
     }
 
     @Test
     void createOrder() {
-        given(userDAO.getUserById(TEST_ID)).willReturn(Optional.of(user));
-        given(giftDAO.getGiftById(TEST_ID)).willReturn(Optional.of(gift));
-        given(orderDAO.createOrder(orderToCreate)).willReturn(order);
+        given(userRepository.findById(any())).willReturn(Optional.of(user));
+        given(giftRepository.findById(any())).willReturn(Optional.of(gift));
+        given(orderRepository.save(orderToCreate)).willReturn(order);
         OrderDTO createdOrder = orderService.createOrder(createOrderParameter);
         assertEquals(orderDTO, createdOrder);
     }
@@ -199,20 +200,22 @@ class OrderServiceTest {
 
     @Test
     void createOrderNoSuchGiftException() {
-        given(giftDAO.getGiftById(TEST_ID)).willReturn(Optional.empty());
+        given(giftRepository.findById(any())).willReturn(Optional.empty());
         assertThrows(NoSuchGiftException.class, () -> orderService.createOrder(createOrderParameter));
     }
 
     @Test
     void createOrderNoSuchUserException() {
-        given(giftDAO.getGiftById(TEST_ID)).willReturn(Optional.of(gift));
-        given(userDAO.getUserById(TEST_ID)).willReturn(Optional.empty());
+        given(giftRepository.findById(any())).willReturn(Optional.of(gift));
+        given(userRepository.findById(any())).willReturn(Optional.empty());
         assertThrows(NoSuchUserException.class, () -> orderService.createOrder(createOrderParameter));
     }
 
     @Test
     void getAllOrders() {
-        given(orderDAO.getAllOrders(page.getPage(),page.getSize())).willReturn(orderList);
+        Page<Order> pageable = mock(Page.class) ;
+        given(orderRepository.findAll(any(Pageable.class))).willReturn(pageable);
+        when(pageable.toList()).thenReturn(orderList);
         List<OrderDTO> allOrders = orderService.getAllOrders(page);
         List<OrderDTO> orderDTOList = OrderEntityToDTOMapper.toDTO(orderList);
         assertEquals(orderDTOList, allOrders);

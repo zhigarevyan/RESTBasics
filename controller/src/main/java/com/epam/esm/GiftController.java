@@ -5,12 +5,13 @@ import com.epam.esm.dto.TagDTO;
 import com.epam.esm.service.GiftService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.GiftQueryParameters;
-import com.epam.esm.util.Page;
 import com.epam.esm.util.assembler.GiftModelAssembler;
 import com.epam.esm.util.assembler.TagModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -40,29 +41,34 @@ public class GiftController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAnonymous()")
     public EntityModel<GiftDTO> getGiftById(@PathVariable int id) {
         return giftModelAssembler.toModel(giftService.getGiftById(id));
     }
 
     @GetMapping
-    public List<EntityModel<GiftDTO>> getGiftsByParams(@Valid GiftQueryParameters params) {
-            return giftModelAssembler.toModel(giftService.getGiftsByParams(params));
+    @PreAuthorize("isAnonymous()")
+    public List<EntityModel<GiftDTO>> getGiftsByParams(@Valid GiftQueryParameters params, Pageable page) {
+            return giftModelAssembler.toModel(giftService.getGiftsByParams(params,page));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<GiftDTO> updateGift(@RequestBody GiftDTO giftDTO, @PathVariable int id) {
         return giftModelAssembler.toModel(giftService.updateGiftById(giftDTO, id));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteGift(@PathVariable int id) {
         giftService.deleteGiftById(id);
     }
 
     @GetMapping("/{id}/tags")
-    public List<EntityModel<TagDTO>> getTagsByGiftId(@PathVariable int id,@Valid Page page) {
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    public List<EntityModel<TagDTO>> getTagsByGiftId(@PathVariable int id,@Valid Pageable page) {
         return tagModelAssembler.toModel(tagService.getTagListByGiftId(id,page));
     }
 

@@ -16,6 +16,8 @@ import java.util.Locale;
 @RestControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String DUPLICATE_TAG = "duplicate_tag";
+    private static final String DUPLICATE_USER = "duplicate_user";
+    private static final String AUTH_FAIL = "auth_fail";
     private static final String NO_SUCH_TAG = "no_such_tag";
     private static final String NO_SUCH_GIFT = "no_such_gift";
     private static final String NO_SUCH_ORDER = "no_such_order";
@@ -28,12 +30,29 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     public ControllerExceptionHandler(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
+
     @ExceptionHandler(DuplicateTagException.class)
     public ResponseEntity<ExceptionResponse> handleDuplicateTagException(DuplicateTagException e, Locale locale){
         String message = messageSource.getMessage(DUPLICATE_TAG, new Object[]{}, locale);
         ExceptionResponse exceptionResponse = new ExceptionResponse(message, e.getErrorCode());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(DuplicateUserException.class)
+    public ResponseEntity<ExceptionResponse> handleDuplicateTagException(DuplicateUserException e, Locale locale){
+        String message = messageSource.getMessage(DUPLICATE_USER, new Object[]{}, locale);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(message, e.getErrorCode());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ExceptionResponse> handleDuplicateTagException(AuthException e, Locale locale){
+        String message = messageSource.getMessage(AUTH_FAIL, new Object[]{}, locale);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(message, e.getErrorCode());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
+    }
+
+
 
     @ExceptionHandler(NoSuchTagException.class)
     public ResponseEntity<ExceptionResponse> handleNoSuchTagException(NoSuchTagException e, Locale locale){
@@ -55,6 +74,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponse exceptionResponse = new ExceptionResponse(message, e.getErrorCode());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
+
+
 
     @ExceptionHandler(NoSuchUserException.class)
     public ResponseEntity<ExceptionResponse> handleNoSuchUserException(NoSuchUserException e, Locale locale){

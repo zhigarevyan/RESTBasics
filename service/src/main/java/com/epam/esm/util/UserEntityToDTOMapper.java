@@ -19,6 +19,7 @@ public class UserEntityToDTOMapper {
         userDTO.setId(user.getId());
         userDTO.setName(user.getName());
         userDTO.setOrderList(UserEntityToDTOMapper.toUserOrder(user.getOrderList()));
+        userDTO.setLogin(user.getLogin());
         return userDTO;
     }
 
