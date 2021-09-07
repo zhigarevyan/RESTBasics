@@ -1,13 +1,12 @@
 package com.epam.esm.util.specification;
 
 import com.epam.esm.model.*;
+import com.epam.esm.model.Order;
 import com.epam.esm.util.*;
-import org.springframework.stereotype.Component;
 import org.springframework.data.jpa.domain.Specification;
-import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
-import javax.persistence.criteria.Order;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,10 +24,18 @@ public final class GiftSpecification {
     public static Specification<Gift> giftListByOrderId(int orderId) {
         return (Specification<Gift>) (root, query, cb) -> {
 
-            Root<Order> giftRoot = query.from(Order.class);
+/*            Root<Order> giftRoot = query.from(Order.class);
             ListJoin<Order, Gift> orderList = giftRoot.joinList(Gift_.TAG_LIST);
 
-            return cb.equal(orderList.get(Order_.ID), orderId);
+            return cb.equal(orderList.get(Order_.ID), orderId);*/
+            query.distinct(true);
+            Root<Gift> giftRoot = root;
+            Subquery<Order> orderSubQuery = query.subquery(Order.class);
+            Root<Order> orderRoot = orderSubQuery.from(Order.class);
+            Expression<Collection<Gift>> orderGiftList = orderRoot.get(Order_.GIFT_LIST);
+            orderSubQuery.select(orderRoot);
+            orderSubQuery.where(cb.equal(orderRoot.get(Order_.ID), orderId), cb.isMember(giftRoot, orderGiftList));
+            return cb.exists(orderSubQuery);
         };
     }
 

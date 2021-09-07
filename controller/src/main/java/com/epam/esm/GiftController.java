@@ -35,6 +35,7 @@ public class GiftController {
 
 
     @PostMapping()
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public EntityModel<GiftDTO> createGift(@RequestBody @Valid GiftDTO giftDTO) {
         return giftModelAssembler.toModel(giftService.createGift(giftDTO));
@@ -51,6 +52,7 @@ public class GiftController {
     public List<EntityModel<GiftDTO>> getGiftsByParams(@Valid GiftQueryParameters params, Pageable page) {
             return giftModelAssembler.toModel(giftService.getGiftsByParams(params,page));
     }
+
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -71,6 +73,8 @@ public class GiftController {
     public List<EntityModel<TagDTO>> getTagsByGiftId(@PathVariable int id,@Valid Pageable page) {
         return tagModelAssembler.toModel(tagService.getTagListByGiftId(id,page));
     }
+
+
 
 
 }

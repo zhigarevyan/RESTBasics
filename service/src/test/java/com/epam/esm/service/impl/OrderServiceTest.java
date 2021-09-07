@@ -80,7 +80,7 @@ class OrderServiceTest {
 
         UserInOrderDTO userInOrderDTO = new UserInOrderDTO();
         userInOrderDTO.setId(TEST_ID);
-        userInOrderDTO.setName(TEST_NAME);
+        userInOrderDTO.setLogin(TEST_NAME);
 
 
         gift = new Gift();

@@ -11,6 +11,7 @@ import com.epam.esm.repository.GiftRepository;
 import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.util.GiftEntityDTOMapper;
+import com.epam.esm.util.GiftFieldUpdater;
 import com.epam.esm.util.GiftQueryParameters;
 import com.epam.esm.util.Validator;
 import com.epam.esm.util.specification.GiftSpecification;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +116,8 @@ public class GiftService {
         List<Tag> tagList = createTagsIfNotFoundAndReturnAll(gift.getTagList());
         Gift entity = GiftEntityDTOMapper.toEntity(gift);
         entity.setTagList(tagList);
+        entity.setCreateDate(Instant.now());
+        entity.setLastUpdateDate(Instant.now());
         Gift createdGift = giftRepository.save(entity);
         return toDTO(createdGift);
     }
@@ -148,12 +152,20 @@ public class GiftService {
             throw new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, id),
                     String.format(ERROR_CODE_NO_SUCH_GIFT, id));
         }
-        List<Tag> tagList = createTagsIfNotFoundAndReturnAll(giftDTO.getTagList());
+
+        Gift giftFromDB = giftRepository.findById(id).orElseThrow(() ->
+                new NoSuchGiftException(String.format(MESSAGE_NO_SUCH_GIFT_EXCEPTION, id),
+                        String.format(ERROR_CODE_NO_SUCH_GIFT, id)));
+
         LocalDateTime now = LocalDateTime.now();
         giftDTO.setLastUpdateDate(now);
+
+        List<Tag> tagList = createTagsIfNotFoundAndReturnAll(giftDTO.getTagList());
         Gift entity = GiftEntityDTOMapper.toEntity(giftDTO);
         entity.setTagList(tagList);
-        return toDTO(giftRepository.save(entity));
+
+        GiftFieldUpdater.update(giftFromDB,entity);
+        return toDTO(giftRepository.save(giftFromDB));
     }
 
     /**
@@ -177,17 +189,6 @@ public class GiftService {
 
     /**
      * Invokes Repository
-     *method to get List of all Gifts from database.
-     *
-     * @return List of {@link GiftDTO} objects with Gift data.
-     */
-    public List<GiftDTO> getGifts(Pageable page) {
-        List<Gift> gifts = giftRepository.findAll(page).toList();
-        return toDTO(gifts);
-    }
-
-    /**
-     * Invokes Repository
      *method to get List of all Gifts that matches parameters
      *
      * @param params is {@link GiftQueryParameters} object with requested parameters
@@ -200,6 +201,17 @@ public class GiftService {
         List<Gift> giftList = giftRepository.findAll(GiftSpecification.findByQueryParameter(params),page).toList();
 
         return toDTO(giftList);
+    }
+    /**
+     * Invokes Repository method to get List of all GiftCertificates from database.
+     *
+     * @param pageable is {@link Pageable} object with page number and page size
+     * @return List of {@link GiftDTO} objects with GiftCertificate data.
+     */
+    public List<GiftDTO> getGifts(Pageable pageable) {
+        List<Gift> giftCertificateList = giftRepository.findAll(pageable).toList();
+
+        return GiftEntityDTOMapper.toDTO(giftCertificateList);
     }
 
     public List<GiftDTO> getCertificateListByOrderID(int id, Pageable page) {

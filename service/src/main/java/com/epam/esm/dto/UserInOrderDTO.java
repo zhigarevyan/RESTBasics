@@ -7,5 +7,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserInOrderDTO {
     private Integer id;
-    private String name;
+    private String login;
 }

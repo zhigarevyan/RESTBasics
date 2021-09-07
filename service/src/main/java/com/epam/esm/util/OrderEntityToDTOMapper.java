@@ -33,7 +33,7 @@ public class OrderEntityToDTOMapper {
         UserInOrderDTO userInOrder = new UserInOrderDTO();
 
         userInOrder.setId(user.getId());
-        userInOrder.setName(user.getName());
+        userInOrder.setLogin(user.getLogin());
 
         return userInOrder;
     }
