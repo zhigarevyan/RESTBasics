@@ -1,0 +1,13 @@
+com\epam\esm\util\assembler\TagModelAssembler.class
+com\epam\esm\UserController.class
+com\epam\esm\ControllerExceptionHandler.class
+com\epam\esm\util\assembler\UserModelAssembler.class
+com\epam\esm\configuration\DispatcherConfig.class
+com\epam\esm\OrderController.class
+com\epam\esm\TagController.class
+com\epam\esm\util\assembler\OrderModelAssembler.class
+com\epam\esm\util\ExceptionResponse.class
+com\epam\esm\configuration\ControllerConfig.class
+com\epam\esm\util\assembler\GiftModelAssembler.class
+com\epam\esm\GiftController.class
+com\epam\esm\configuration\SpringBootStarter.class
