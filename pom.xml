@@ -69,13 +69,4 @@
             <version>3.11</version>
         </dependency>
     </dependencies>
-    <profiles>
-        <profile>
-            <id>prod</id>
-        </profile>
-        <profile>
-            <id>dev</id>
-        </profile>
-    </profiles>
-
 </project>
