@@ -48,7 +48,7 @@ public class OrderController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @ResponseStatus(HttpStatus.CREATED)
     public EntityModel<OrderDTO> createOrder(@RequestBody @Valid CreateOrderParameter parameter) {
         return orderModelAssembler.toModel(orderService.createOrder(parameter));

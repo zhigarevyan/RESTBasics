@@ -23,11 +23,6 @@ public final class GiftSpecification {
      */
     public static Specification<Gift> giftListByOrderId(int orderId) {
         return (Specification<Gift>) (root, query, cb) -> {
-
-/*            Root<Order> giftRoot = query.from(Order.class);
-            ListJoin<Order, Gift> orderList = giftRoot.joinList(Gift_.TAG_LIST);
-
-            return cb.equal(orderList.get(Order_.ID), orderId);*/
             query.distinct(true);
             Root<Gift> giftRoot = root;
             Subquery<Order> orderSubQuery = query.subquery(Order.class);

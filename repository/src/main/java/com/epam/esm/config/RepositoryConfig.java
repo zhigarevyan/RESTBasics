@@ -27,7 +27,6 @@ public class RepositoryConfig {
             DataSource dataSource, JpaVendorAdapter jpaVendorAdapter) {
 
         LocalContainerEntityManagerFactoryBean lef = new LocalContainerEntityManagerFactoryBean();
-
         lef.setDataSource(dataSource);
         lef.setPackagesToScan("com.epam.esm.model");
         lef.setJpaVendorAdapter(jpaVendorAdapter);
@@ -65,7 +64,7 @@ public class RepositoryConfig {
     private Properties hibernateProperties() {
         Properties hibernateProperties = new Properties();
 
-        hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "validate");
+        hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "update");
         hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
         hibernateProperties.setProperty("hibernate.show_sql", "true");
         hibernateProperties.setProperty("hibernate.globally_quoted_identifiers", "true");

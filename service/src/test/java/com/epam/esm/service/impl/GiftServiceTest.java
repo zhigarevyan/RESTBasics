@@ -10,7 +10,6 @@ import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.GiftService;
 import com.epam.esm.util.GiftQueryParameters;
-import com.epam.esm.util.specification.GiftSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -47,7 +47,7 @@ public class GiftController {
         return giftModelAssembler.toModel(giftService.getGiftById(id));
     }
 
-    @GetMapping
+    @GetMapping("/byParams")
     @PreAuthorize("isAnonymous()")
     public List<EntityModel<GiftDTO>> getGiftsByParams(@Valid GiftQueryParameters params, Pageable page) {
             return giftModelAssembler.toModel(giftService.getGiftsByParams(params,page));
