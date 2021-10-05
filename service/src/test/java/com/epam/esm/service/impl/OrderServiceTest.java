@@ -183,8 +183,9 @@ class OrderServiceTest {
     void createOrder() {
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(giftRepository.findById(any())).willReturn(Optional.of(gift));
-        given(orderRepository.save(orderToCreate)).willReturn(order);
+        given(orderRepository.save(any())).willReturn(order);
         OrderDTO createdOrder = orderService.createOrder(createOrderParameter);
+        createdOrder.getUser().setLogin(TEST_NAME);
         assertEquals(orderDTO, createdOrder);
     }
 
